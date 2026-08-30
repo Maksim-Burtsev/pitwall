@@ -58,14 +58,23 @@ from the payload.
 
 ## Read the numbers in this order
 
-1. **`fanout_potential` vs `fanout_actual`.** The headline. Potential below ~1.6 means the
-   human, not the agent, is the constraint — *no amount of extra sessions helps*. Actual well
-   below potential means capacity is sitting unused.
-2. **`occupancy`.** Share of supervised time an agent was actually working. Below 50% means
-   more than half of the time you were watching agents, they were watching you.
+The report now computes its own findings and prints them. Your job is not to repeat them — it
+is to say which one matters most for this person, and what they should change on Monday.
+
+1. **`elapsed_h` vs `dead_h`.** The headline. `elapsed_h` is wall clock — their actual day with
+   agents open. `dead_h` is the slice of it with *zero* agents running. Above ~20% is a dispatch
+   problem, not a capacity problem.
+2. **`fanout_potential` vs `fanout_actual`.** Potential below ~1.8 means the human, not the
+   agent, is the constraint: *no amount of extra sessions helps*. A wide gap the other way means
+   capacity is sitting unused.
 3. **The idle split** (`wti_h` / `wtq_h` / `wtsa_h`). This says *which* correction applies.
-4. **`switch_rate`** and the per-session `attention` / `blocked_h` columns. This says *which
-   sessions* caused it.
+4. **`switch_rate`, `days[].events`, and the per-session `attention` / `blocked_h`.** This says
+   *which sessions and which hours* caused it.
+
+Never mix the two clocks in a sentence. `elapsed_h`, `dead_h`, `your_h` and `live_h` are wall
+clock; `work_h`, `idle_h`, and everything in the session table are agent-hours that run in
+parallel. Saying "you spent 26 hours" when the number is agent-hours is the single easiest way
+to make the whole report untrustworthy.
 
 ## Diagnosis
 
@@ -74,14 +83,14 @@ findings that land beat eight that hedge.
 
 | Fires when | Failure mode | The correction |
 |---|---|---|
-| `fanout_potential < 1.6` | **Human-bound.** Your turnaround exceeds the agent's run length. | Stop opening sessions; grow `NT`. Bigger task units, a plan file the agent can execute end-to-end, pre-approved tool permissions so it does not stop to ask. Target runs of 10-15 min, not 2. |
-| `wtq_h` > 35% of idle | **Over-parallelized.** Agents queue behind you. | Cap concurrent sessions at `floor(fanout_potential)`. The surplus sessions are not producing, they are waiting. |
-| `wtsa_h` > 25% of idle | **Reorientation tax.** You lose the thread on switch. | Group parallel sessions by shared context — same repo, same subsystem, same mental model. Unrelated contexts cost the full 15-25 min rebuild each time. Leave the next step written down before switching away. |
-| `switch_rate > 4/h` | **Thrash.** Switching faster than context can be rebuilt. | Batch: finish a turn's worth of thinking in one session before touching another. |
-| a session with `attention > 2.5` and high `blocked_h` | **Toxic task.** It holds you and starves the rest. | Give it sole focus and close the others, or reshape it: the ping-pong usually means the task was under-specified, so front-load the context instead of feeding it in pieces. |
-| `prompts` high but `work_h/prompts` low across many sessions | **Micromanagement.** Many prompts, little agent work each. | Under-specified opening prompts cause clarification loops. Spend one longer prompt to buy fifteen quiet minutes. |
-| `abandoned` large relative to `prompts` | **Abandonment.** Agents finished and nobody came back. | Work sitting unreviewed on branches. Either close the loop or do not start those sessions. |
-| `occupancy > 0.75` and `fanout_actual` near `fanout_potential` | **Well-tuned.** | Say so plainly. The correction is only to raise `NT` if they want more headroom. |
+| `fanout_potential < 1.8` | **Human-bound.** Turnaround exceeds the agent's run length. | Stop opening sessions; grow `NT`. Bigger task units, a plan file the agent can execute end-to-end, pre-approved tool permissions so it does not stop to ask. Target runs of 10-15 min, not 2. |
+| `dead_h / elapsed_h > 0.18` | **Empty queue.** Everything finished; nothing was started. | Not capacity — dispatch. Write the next prompt before the current run ends, so the agent never lands on an empty queue. |
+| `wtq_h` > 33% of `idle_h` | **Over-parallelized.** Agents queue behind you. | Cap concurrent sessions at `floor(fanout_potential)`. The surplus is not producing, it is waiting. |
+| `wtsa_h` > 22% of `idle_h` | **Reorientation tax.** They lose the thread on switch. | Group parallel sessions by shared context — same repo, same subsystem. Unrelated contexts cost the full 15-25 min rebuild each time. Leave the next step written down before switching away. |
+| `switch_rate > 4` | **Thrash.** Switching faster than context rebuilds. | Finish a turn's worth of thinking in one session before touching another. |
+| a session with `attention > 2.5` and high `blocked_h` | **Toxic task.** It holds them and starves the rest. | Sole focus, or reshape it: the ping-pong usually means the task was under-specified, so front-load the context instead of feeding it in pieces. |
+| many `dropped` events | **Abandonment.** Agents finished and nobody came back. | Work sitting unreviewed on branches. Close the loop or do not start those sessions. |
+| `clean` events present | **Already right.** | Name them. Those tasks were specified well enough to be left alone; that is the pattern to copy, and it is more useful than another criticism. |
 
 ## Report back
 

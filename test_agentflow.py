@@ -67,20 +67,28 @@ def main():
         assert len(res["gaps"]) == 1, res["gaps"]     # only session a is ever answered again
         g = res["gaps"][0]
         assert g["gap"] == 240, g
+        # you were with session a until you prompted b at t=100, so 40s of the gap is yours
         assert g["wti"] == af.MIN_WTI, g              # short read + short write floors out
-        assert g["wtq"] == 240 - af.MIN_WTI, g        # session b held the human -> charged to the queue
-        assert g["wtsa"] == 0, g
+        assert g["wtsa"] == 40 - af.MIN_WTI, g
+        assert g["wtq"] == 200, g                     # the rest is a queued behind b
 
         k = res["kpi"]
-        assert k["nt"] == 60, k["nt"]                 # median of 40, 50, 60, 60
-        assert k["it"] == 240, k["it"]
-        assert abs(k["fanout_potential"] - (1 + 60 / 240)) < 1e-9, k
+        assert k["nt"] == 60, k["nt"]                 # median run of 40, 50, 60, 60
+        assert k["it"] == 40, k["it"]                 # your own time on the session, not the whole gap
+        assert abs(k["fanout_potential"] - 2.5) < 1e-9, k
         assert abs(k["occupancy"] - 210 / 450) < 1e-9, k
+        assert k["your_h"] * 3600 == 40, k["your_h"]
         assert k["prompts"] == 4, k
 
         # a (0..60) and c (20..80) overlap for 40s; the other 130s of busy wall-clock is solo
         assert abs(res["concurrency"][2] * 3600 - 40) < 1e-6, res["concurrency"]
         assert abs(res["concurrency"][1] * 3600 - 130) < 1e-6, res["concurrency"]
+
+        # one working block 0..340; agents ran for 170s of it, and no hole reaches DEAD_AIR
+        assert len(res["blocks"]) == 1, res["blocks"]
+        assert k["elapsed_h"] * 3600 == 340, k["elapsed_h"]
+        assert abs(k["live_h"] * 3600 - 170) < 1e-6, k["live_h"]
+        assert k["dead_h"] == 0, k["dead_h"]
 
         payload = af.to_payload(res, days=1)
         html = af.render(payload, open("report.tpl.html").read())

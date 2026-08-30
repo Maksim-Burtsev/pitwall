@@ -17,17 +17,24 @@ no network, no telemetry — stdlib Python reading the session logs already on y
 ## What it tells you
 
 ```
-77 sessions, 381 prompts, 14d window
-agent work 25.4h vs idle-waiting-you 20.6h (occupancy 55%)
-NT=2.1m IT=5.2m -> fan-out potential 1.4, actual 1.32
+80 sessions, 391 prompts, 14d window
+your day 35.6h  |  agent-hours: 26.0 working, 20.8 waiting  |  dead air 8.2h
+NT=2.1m IT=3.1m -> fan-out potential 1.7, actual 1.32
 ```
 
-Read that as: agent runs last 2.1 minutes, human turnaround takes 5.2. One person can keep
-1.4 agents fed. Opening a fifth terminal tab will not help — the constraint is task shape,
-not tab count.
+Two clocks, never mixed. **Wall clock** is your day and can never exceed it. **Agent-hours**
+run in parallel, so 26 of them fit inside 20 hours of yours. *Dead air* is the number that
+stings: time inside your working day when not one agent was running — everything finished,
+nothing started.
 
-The HTML adds a per-day timeline of every session on a shared wall clock, with each agent's
-idle time attributed to a cause.
+The last line is the ceiling. Runs last 2.1 minutes, your turn takes 3.1, so one person keeps
+1.7 agents fed and you ran 1.32. Opening a fifth terminal tab cannot move that — the
+constraint is task shape, not tab count.
+
+The HTML report adds a strip chart per day: a pen trace of agents running in parallel, one
+lane per session, and flags on the moments the numbers are made of — where agents starved
+behind you, where you thrashed between sessions, and where a task was specified well enough
+to run twenty minutes without you. Each day ends with those moments written out in words.
 
 ## The model
 
