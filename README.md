@@ -31,10 +31,19 @@ The last line is the ceiling. Runs last 2.1 minutes, your turn takes 3.1, so one
 1.7 agents fed and you ran 1.32. Opening a fifth terminal tab cannot move that — the
 constraint is task shape, not tab count.
 
-The HTML report adds a strip chart per day: a pen trace of agents running in parallel, one
-lane per session, and flags on the moments the numbers are made of — where agents starved
-behind you, where you thrashed between sessions, and where a task was specified well enough
-to run twenty minutes without you. Each day ends with those moments written out in words.
+The HTML report is a dark shift board built around that number:
+
+- **Hero** — agent-hours delivered, per-day bars, leverage (agent-hours per hour of yours).
+- **Your hours** — three meters against your wall-clock day: agents running, you hands-on,
+  dead air; plus a histogram of your turnaround and how it is counted.
+- **Day by day** — a trace of how many agents were running, your prompts as ticks, dead air
+  hatched, flags on starvation/thrash/dropped/clean moments, and each day's findings in
+  words. Session lanes fold away until asked for.
+- **Projects** — where the waiting concentrates, with an efficiency share per repo.
+- **Task types** — sessions classified from what the agent actually did (build / research /
+  fix / ops / talk) and what each type costs you in turnaround.
+- **Strengths** — measured things you already do well.
+- **The three changes** — ranked by the agent-hours they give back.
 
 ## The model
 

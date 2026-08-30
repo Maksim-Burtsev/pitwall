@@ -45,6 +45,47 @@ def text_len(content):
     return 0
 
 
+def as_text(content):
+    if isinstance(content, list):
+        return " ".join(b.get("text", "") for b in content if isinstance(b, dict))
+    return content if isinstance(content, str) else ""
+
+
+# ponytail: keyword + tool-mix heuristic. The skill reads the transcripts when
+# it needs the real answer; this only has to sort sessions into coarse bins.
+KIND_WORDS = {
+    "fix":      ("fix", "bug", "error", "traceback", "fail", "broken", "crash", "падает", "ошибк",
+                 "баг", "не работает", "сломал", "почини", "исправ", "flaky", "regress"),
+    "research": ("research", "compare", "explain", "why", "what is", "how does", "options", "plan",
+                 "design", "investigate", "расскажи", "объясни", "сравни", "почему", "что такое",
+                 "как работает", "варианты", "план", "исследу", "посмотри что", "разбер", "вопрос"),
+    "ops":      ("install", "deploy", "publish", "release", "setup", "configure", "link", "commit",
+                 "push", "merge", "pr ", "установи", "настрой", "опубликуй", "релиз", "закоммить",
+                 "запушь", "мерж", "подключи"),
+}
+
+
+def classify(opening, tools, n_prompts):
+    """Coarse task type from the opening prompt and what the agent actually did."""
+    text = opening.lower()
+    edits = tools.get("Edit", 0) + tools.get("Write", 0) + tools.get("NotebookEdit", 0)
+    web = tools.get("WebSearch", 0) + tools.get("WebFetch", 0)
+    total = sum(tools.values())
+    hits = {k: sum(w in text for w in ws) for k, ws in KIND_WORDS.items()}
+    best = max(hits, key=hits.get) if any(hits.values()) else None
+    if best == "fix" and hits["fix"] >= 1:
+        return "fix"
+    if edits >= 5 and edits >= 0.08 * max(total, 1):
+        return "build"
+    if web >= 3 or best == "research":
+        return "research"
+    if best == "ops" or (tools.get("Bash", 0) >= 3 and edits == 0 and total >= 3):
+        return "ops"
+    if total < 2 * max(n_prompts, 1):
+        return "talk"
+    return "build" if edits else "ops"
+
+
 def first_line(content):
     """A session's own words make a better lane label than its uuid."""
     if isinstance(content, list):
@@ -71,7 +112,8 @@ def load_sessions(root, since):
     """Sessions with no human prompt are SDK or subagent runs — nobody was
     supervising them, so they have no place in a supervision metric."""
     for path in sorted(glob_jsonl(root)):
-        events, submits, title, cwd, branch, first = [], [], None, None, None, None
+        events, submits, title, cwd, branch, first, opening = [], [], None, None, None, None, ""
+        tools = defaultdict(int)
         for line in open(path, errors="ignore"):
             try:
                 d = json.loads(line)
@@ -93,11 +135,15 @@ def load_sessions(root, since):
             msg = d.get("message") or {}
             if kind == "assistant":
                 events.append((t, "assistant", text_len(msg.get("content"))))
+                for b in msg.get("content") or []:
+                    if isinstance(b, dict) and b.get("type") == "tool_use":
+                        tools[b.get("name", "?").split("__")[0]] += 1
             elif kind == "user" and (d.get("origin") or {}).get("kind") == "human":
                 events.append((t, "human", 0))
                 submits.append((t, text_len(msg.get("content"))))
                 if first is None:
                     first = first_line(msg.get("content"))
+                    opening = as_text(msg.get("content"))[:600]
             else:
                 events.append((t, "other", 0))
         if not submits or not events:
@@ -107,7 +153,8 @@ def load_sessions(root, since):
             continue
         yield {"id": os.path.basename(path)[:-6], "project": os.path.basename(os.path.dirname(path)),
                "cwd": cwd or "", "branch": branch, "title": title or first,
-               "events": events, "submits": sorted(submits)}
+               "events": events, "submits": sorted(submits),
+               "tools": dict(tools), "kind": classify(opening, tools, len(submits))}
 
 
 def busy_runs(events):
@@ -231,7 +278,16 @@ def analyze(sessions, since):
     switches = [(b[0], a[1], b[1]) for a, b in zip(all_submits, all_submits[1:]) if a[1] != b[1]]
 
     events = find_events(sessions, gaps, dead, switches, all_submits)
+    kinds = per_kind(sessions, gaps)
+    projects = per_project(sessions, gaps)
+    own = [g["wti"] + g["wtsa"] for g in gaps if not g["away"]]
+    turn_hist = {"<1m": 0, "1-3m": 0, "3-10m": 0, "10-20m": 0}
+    for x in own:
+        turn_hist["<1m" if x < 60 else "1-3m" if x < 180 else "3-10m" if x < 600 else "10-20m"] += 1
     return {
+        "kinds": kinds, "projects": projects, "turn_hist": turn_hist,
+        "levers": levers(sessions, gaps, dead, events, kinds, switches, elapsed, occ, wall),
+        "strengths": strengths(sessions, gaps, events, kinds, projects, occ, wall),
         "sessions": sessions, "gaps": gaps, "blocks": blocks, "events": events,
         "kpi": {
             "nt": nt, "it": it,
@@ -258,6 +314,115 @@ def analyze(sessions, since):
         "concurrency": {k: v / 3600 for k, v in sorted(occ.items())},
         "per_session": per_session(sessions, gaps),
     }
+
+
+def per_kind(sessions, gaps):
+    by = defaultdict(lambda: {"n": 0, "work": [], "own": [], "drift": 0.0, "wtq": 0.0, "prompts": 0})
+    kind_of = {s["id"]: s["kind"] for s in sessions}
+    for s in sessions:
+        k = by[s["kind"]]
+        k["n"] += 1
+        k["prompts"] += len(s["submits"])
+        k["work"] += [sec(r["start"], r["end"]) for r in s["runs"]]
+    for g in gaps:
+        if g["away"]:
+            continue
+        k = by[kind_of[g["sid"]]]
+        k["own"].append(g["wti"] + g["wtsa"])
+        k["drift"] += g["wtsa"]
+        k["wtq"] += g["wtq"]
+    out = {}
+    for name, k in by.items():
+        out[name] = {"n": k["n"], "prompts": k["prompts"], "work_h": sum(k["work"]) / 3600,
+                     "nt": median(k["work"]), "it": median(k["own"]),
+                     "drift_h": k["drift"] / 3600, "starved_h": k["wtq"] / 3600,
+                     "turns": len(k["own"])}
+    return out
+
+
+def per_project(sessions, gaps):
+    by = defaultdict(lambda: {"work": 0.0, "own": 0.0, "wtq": 0.0, "drift": 0.0, "n": 0, "clean": 0})
+    proj_of = {s["id"]: (s["cwd"].rsplit("/", 1)[-1] or s["project"]) for s in sessions}
+    for s in sessions:
+        p = by[proj_of[s["id"]]]
+        p["n"] += 1
+        for r in s["runs"]:
+            d = sec(r["start"], r["end"])
+            p["work"] += d
+            p["clean"] += d >= CLEAN_RUN
+    for g in gaps:
+        if g["away"]:
+            continue
+        p = by[proj_of[g["sid"]]]
+        p["own"] += g["wti"] + g["wtsa"]
+        p["wtq"] += g["wtq"]
+        p["drift"] += g["wtsa"]
+    out = []
+    for name, p in by.items():
+        waited = p["own"] + p["wtq"]
+        out.append({"project": name, "sessions": p["n"], "work_h": p["work"] / 3600,
+                    "your_h": p["own"] / 3600, "starved_h": p["wtq"] / 3600,
+                    "drift_h": p["drift"] / 3600, "clean": p["clean"],
+                    "efficiency": p["work"] / (p["work"] + waited) if p["work"] else 0})
+    return sorted(out, key=lambda x: -x["work_h"])
+
+
+def levers(sessions, gaps, dead, events, kinds, switches, elapsed, occ, wall):
+    """The few changes worth most, ranked by the hours they would return."""
+    mean_conc = sum(k * v for k, v in occ.items()) / wall if wall else 1
+    dead_s = sum(sec(*d) for d in dead)
+    wtq = sum(g["wtq"] for g in gaps)
+    wtsa = sum(g["wtsa"] for g in gaps)
+    out = []
+    if dead_s > 0:
+        out.append({"kind": "dispatch", "hours": dead_s / 3600 * max(mean_conc, 1),
+                    "evidence": {"dead_h": dead_s / 3600, "share": dead_s / max(elapsed, 1),
+                                 "windows": sum(1 for e in events if e["kind"] == "dead")}})
+    if wtq > 0:
+        starve_by = defaultdict(float)
+        kind_of = {s["id"]: s["kind"] for s in sessions}
+        for e in events:
+            if e["kind"] == "starve" and e.get("holder_sid"):
+                starve_by[kind_of[e["holder_sid"]]] += sec(e["start"], e["end"])
+        out.append({"kind": "parallel", "hours": wtq / 3600,
+                    "evidence": {"starved_h": wtq / 3600, "windows": sum(1 for e in events if e["kind"] == "starve"),
+                                 "held_by": dict(sorted(starve_by.items(), key=lambda x: -x[1])[:2])}})
+    if wtsa > 0:
+        slow = sorted(((v["it"], k) for k, v in kinds.items() if v["turns"] >= 5), reverse=True)
+        out.append({"kind": "reorient", "hours": wtsa / 3600,
+                    "evidence": {"drift_h": wtsa / 3600, "switches": len(switches),
+                                 "switch_rate": len(switches) / (elapsed / 3600) if elapsed else 0,
+                                 "slowest": slow[0][1] if slow else None,
+                                 "slowest_it": slow[0][0] if slow else 0,
+                                 "fastest": slow[-1][1] if slow else None,
+                                 "fastest_it": slow[-1][0] if slow else 0}})
+    dropped = [e for e in events if e["kind"] == "dropped"]
+    if dropped:
+        out.append({"kind": "dropped", "hours": 0, "count": len(dropped),
+                    "evidence": {"names": sorted({e["who"][0] for e in dropped})[:5]}})
+    return sorted(out, key=lambda x: -x["hours"])
+
+
+def strengths(sessions, gaps, events, kinds, projects, occ, wall):
+    out = []
+    clean = [e for e in events if e["kind"] == "clean"]
+    if clean:
+        top = max(clean, key=lambda e: sec(e["start"], e["end"]))
+        out.append({"kind": "clean", "n": len(clean), "longest": sec(top["start"], top["end"]),
+                    "where": top["who"][0]})
+    good = [p for p in projects if p["work_h"] >= 1]
+    if good:
+        best = max(good, key=lambda p: p["efficiency"])
+        out.append({"kind": "project", "project": best["project"], "efficiency": best["efficiency"],
+                    "work_h": best["work_h"]})
+    fast = [(v["it"], k) for k, v in kinds.items() if v["turns"] >= 5 and v["it"] <= 120]
+    if fast:
+        it, k = min(fast)
+        out.append({"kind": "fast", "task": k, "it": it, "turns": kinds[k]["turns"]})
+    solo = occ.get(1, 0) / wall if wall else 0
+    if solo > .6:
+        out.append({"kind": "focus", "share": solo})
+    return out
 
 
 def concurrency(spans):
@@ -289,7 +454,7 @@ def find_events(sessions, gaps, dead, switches, all_submits):
         held = {g["sid"] for g in gaps if g["wtq"] > 0 and g["leave"] < b and g["end"] > a}
         holder = next((sid for t, sid in all_submits if a <= t <= b), None)
         ev.append({"kind": "starve", "good": False, "start": a, "end": b, "n": len(held),
-                   "who": sorted({name[x] for x in held}), "holder": name.get(holder),
+                   "who": sorted({name[x] for x in held}), "holder": name.get(holder), "holder_sid": holder,
                    "label": f"{len(held)} agents idle for {int(sec(a,b)//60)} min"})
 
     # thrash: switching faster than context can be rebuilt
@@ -346,7 +511,7 @@ def per_session(sessions, gaps):
                      "title": s["title"] or "", "branch": s["branch"],
                      "work_h": work/3600, "wti_h": wti/3600, "wtq_h": wtq/3600,
                      "wtsa_h": wtsa/3600, "blocked_h": blocked/3600,
-                     "prompts": len(s["submits"]), "runs": len(s["runs"]),
+                     "prompts": len(s["submits"]), "runs": len(s["runs"]), "kind": s["kind"],
                      "attention": (wti + wtsa) / work if work else 0})
     return sorted(rows, key=lambda r: -r["work_h"])
 
@@ -384,7 +549,10 @@ def to_payload(res, days):
     meta = {r["id"]: r for r in res["per_session"]}
     lanes = {s["id"]: lane_bars(s, res["gaps"]) for s in res["sessions"]}
 
-    by_day = defaultdict(lambda: {"lanes": defaultdict(list), "events": []})
+    by_day = defaultdict(lambda: {"lanes": defaultdict(list), "events": [], "prompts": []})
+    for s_ in res["sessions"]:
+        for t, _ in s_["submits"]:
+            by_day[t.astimezone().strftime("%Y-%m-%d")]["prompts"].append(iso(t))
     for sid, bars in lanes.items():
         for b in bars:
             key = b["a"].astimezone().strftime("%Y-%m-%d")
@@ -413,7 +581,7 @@ def to_payload(res, days):
                        "bars": bars, "work": sum(b["s"] for b in bars if b["k"] == "work")}
                       for sid, bars in sorted(d["lanes"].items(),
                                               key=lambda kv: min(b["a"] for b in kv[1]))],
-            "events": d["events"],
+            "events": d["events"], "prompts": sorted(d["prompts"]),
             "split": {k: acc[k] for k in ("work", "you", "drift", "wait")},
             "work_h": acc["work"] / 3600, "your_h": (acc["you"] + acc["drift"]) / 3600,
             "wait_h": (acc["wait"] + acc["you"] + acc["drift"]) / 3600,
@@ -423,6 +591,8 @@ def to_payload(res, days):
 
     return {"days_window": days, "generated": iso(datetime.now(timezone.utc)),
             "kpi": res["kpi"], "concurrency": res["concurrency"],
+            "kinds": res["kinds"], "projects": res["projects"], "turn_hist": res["turn_hist"],
+            "levers": res["levers"], "strengths": res["strengths"],
             "sessions": res["per_session"], "days": out_days}
 
 

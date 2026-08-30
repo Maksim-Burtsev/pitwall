@@ -44,37 +44,76 @@ python3 <repo>/agentflow.py --days 14 --json    # metrics for you to read
 python3 <repo>/agentflow.py --days 14           # writes ~/.claude/agent-flow/report.html
 ```
 
-Default window is 14 days. Use `--days 30` for a monthly review, `--days 7` for a weekly one.
+Default window is 14 days; `--days 30` for a monthly review, `--days 7` for a weekly one.
 
 Run both: read the JSON to write your findings, and render the HTML. **Then publish the HTML
 as an Artifact and give them the link in your reply** — do not stop at a file path and offer
-to publish, and do not ask first. The report is the deliverable; a path in terminal scrollback
-is not. Publish the rendered file itself, unchanged.
+to publish, and do not ask first. The report is the deliverable. Publish the rendered file
+itself, unchanged.
 
-One caveat worth a single line to them, not a question: timeline rows are labelled with the
-first 46 characters of each session's opening prompt, so the report carries their own words. If
-they say that is too much for something they intend to share, re-render after stripping `title`
-from the payload.
+One caveat worth a single line to them, not a question: timeline rows and day notes carry the
+first ~46 characters of session prompts, so the report contains their own words. If they mean
+to share it, offer to re-render with `title` stripped.
+
+## What the JSON gives you
+
+Besides `kpi`, the payload carries the analysis blocks the report is built from — use them
+instead of recomputing:
+
+- `levers` — the ranked list of changes with hours attached (`dispatch` = dead air,
+  `parallel` = starvation, `reorient` = drift, `dropped` = unread work). This is the 20% that
+  buys the 80%; your reply should lead with lever #1.
+- `strengths` — measured things they already do well (`clean`, `project`, `fast`, `focus`).
+  Always name at least one, with its number.
+- `kinds` — per task type (`fix`/`build`/`research`/`ops`/`talk`): median agent run `nt`,
+  median human turnaround `it`, drift, starved hours. The classification is a coarse
+  tool-mix + keyword heuristic — trust the direction, not the third decimal.
+- `projects` — per project: agent-hours, your hours, starved hours, `efficiency`, clean runs.
+- `days[].events` — timestamped starvation windows, thrash bursts, dead air, dropped and
+  clean runs.
 
 ## Read the numbers in this order
 
-The report now computes its own findings and prints them. Your job is not to repeat them — it
-is to say which one matters most for this person, and what they should change on Monday.
+The report computes and prints its own findings. Your job is not to repeat them — it is to say
+which one matters most for this person and what to change on Monday, using what the report
+cannot see: the transcripts.
 
-1. **`elapsed_h` vs `dead_h`.** The headline. `elapsed_h` is wall clock — their actual day with
-   agents open. `dead_h` is the slice of it with *zero* agents running. Above ~20% is a dispatch
-   problem, not a capacity problem.
-2. **`fanout_potential` vs `fanout_actual`.** Potential below ~1.8 means the human, not the
-   agent, is the constraint: *no amount of extra sessions helps*. A wide gap the other way means
-   capacity is sitting unused.
-3. **The idle split** (`wti_h` / `wtq_h` / `wtsa_h`). This says *which* correction applies.
-4. **`switch_rate`, `days[].events`, and the per-session `attention` / `blocked_h`.** This says
-   *which sessions and which hours* caused it.
+1. **`elapsed_h` vs `dead_h`** — their day, and the slice of it with zero agents running.
+2. **`levers[0]`** — the biggest recoverable number.
+3. **`kinds`** — which task types eat the turnaround.
+4. **`days[].events` + transcripts** — the specific hours where it went wrong, and why.
 
-Never mix the two clocks in a sentence. `elapsed_h`, `dead_h`, `your_h` and `live_h` are wall
-clock; `work_h`, `idle_h`, and everything in the session table are agent-hours that run in
-parallel. Saying "you spent 26 hours" when the number is agent-hours is the single easiest way
-to make the whole report untrustworthy.
+Never mix the two clocks in a sentence: `elapsed_h`, `dead_h`, `your_h`, `live_h` are wall
+clock; `work_h`, `idle_h`, everything per-session is agent-hours running in parallel. Saying
+"you spent 26 hours" when it is agent-hours is the fastest way to lose their trust.
+
+## Look inside the sessions
+
+The metrics say *where* time went; the transcripts say *why*. Before writing your findings,
+open the worst two or three moments and read them:
+
+```bash
+ls ~/.claude/projects/<project-dir>/<session-id>.jsonl   # ids are in the JSON
+```
+
+Take the largest starvation windows and thrash bursts from `days[].events`, find the session
+that held the user (`holder`), and read what was actually happening around that timestamp.
+You are looking for the mechanism, not a summary:
+
+- **Wrong mix** — a heavy research/planning session run in parallel with quick fixes. The
+  fixes starve while the user is deep in the research thread. Correction: batch the quick
+  kind together; give the deep kind sole focus.
+- **Clarification ping-pong** — many short turns where the agent keeps asking or the user
+  keeps steering. The opening prompt was under-specified; the fix is front-loading context
+  (a plan file, pasted constraints), not faster typing.
+- **Approval friction** — runs that die in under a minute on permission prompts. The fix is
+  pre-approved tools/settings for that repo, and it is mechanical.
+- **Re-explaining after a switch** — the user returns to a session and spends the first turn
+  reconstructing state ("so where were we"). The fix is leaving the next step written down
+  before switching away.
+
+Quote the moment concretely in your reply ("Thursday 18:45, while the HackerNews draft held
+you, three agents sat ready for 20 minutes") — that lands; percentages do not.
 
 ## Diagnosis
 
@@ -94,18 +133,18 @@ findings that land beat eight that hedge.
 
 ## Report back
 
-Three parts, in this order, and keep it short:
+Match the report's own structure, in this order, and keep it short:
 
-1. **What they are good at.** Name it specifically from the data — long unattended runs, low
-   reorientation, sessions grouped by context, prompts queued before the agent goes idle. Not
-   flattery: cite the number.
-2. **The one thing costing the most.** A single named failure mode with its hours attached.
-3. **The correction**, stated as a change to how they *shape or schedule tasks*, not as
-   "be more focused". Look at the session titles in the JSON to make it concrete — say which
-   sessions should not have run at the same time, and why.
+1. **The headline number** — agent-hours delivered, and leverage (agent-hours per hour of
+   theirs). This is the metric being optimized: more agent-hours from the same day.
+2. **What they already do well** — from `strengths`, with the number attached. Not flattery;
+   it is the pattern to copy on bad days.
+3. **The one change that pays most** — `levers[0]`, with its hours, plus the transcript-level
+   why from your reading. One change, stated as a task-shaping or scheduling rule, not as
+   "focus more".
+4. The artifact link.
 
-Then hand over the HTML report.
-
+## Honesty about the measurements
 ## Honesty about the measurements
 
 Say these if they matter to a conclusion:
