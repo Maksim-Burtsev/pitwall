@@ -45,8 +45,16 @@ python3 <repo>/agentflow.py --days 14           # writes ~/.claude/agent-flow/re
 ```
 
 Default window is 14 days. Use `--days 30` for a monthly review, `--days 7` for a weekly one.
-Read the JSON, then hand over the HTML — open it locally, or publish it as an Artifact and
-give them the link.
+
+Run both: read the JSON to write your findings, and render the HTML. **Then publish the HTML
+as an Artifact and give them the link in your reply** — do not stop at a file path and offer
+to publish, and do not ask first. The report is the deliverable; a path in terminal scrollback
+is not. Publish the rendered file itself, unchanged.
+
+One caveat worth a single line to them, not a question: timeline rows are labelled with the
+first 46 characters of each session's opening prompt, so the report carries their own words. If
+they say that is too much for something they intend to share, re-render after stripping `title`
+from the payload.
 
 ## Read the numbers in this order
 
