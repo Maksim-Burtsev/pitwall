@@ -1,4 +1,4 @@
-# agent-flow
+# pitwall
 
 Your AI agents spend most of their life waiting for you. This measures how much, and why.
 
@@ -8,10 +8,10 @@ agents' time was spent idle, waiting for a human to say the next thing** — and
 own habits caused it.
 
 ```
-python3 agentflow.py --days 14
+python3 pitwall.py --days 14
 ```
 
-Writes a self-contained HTML report to `~/.claude/agent-flow/report.html`. No dependencies,
+Writes a self-contained HTML report to `~/.claude/pitwall/report.html`. No dependencies,
 no network, no telemetry — stdlib Python reading the session logs already on your disk.
 
 ## What it tells you
@@ -94,22 +94,22 @@ reading, ~200 chars/min typing) — a calibrated guess. Everything else is measu
 
 ```
 --days N     window to analyze (default 14)
---out PATH   where to write the HTML (default ~/.claude/agent-flow/report.html)
+--out PATH   where to write the HTML (default ~/.claude/pitwall/report.html)
 --json       print the metrics to stdout instead of rendering
 --root PATH  session log directory (default ~/.claude/projects)
 ```
 
 ## As a Claude Code skill
 
-`skills/agent-flow/` holds a skill that runs the analysis and interprets it — it carries the
+`skills/pitwall/` holds a skill that runs the analysis and interprets it — it carries the
 diagnosis rubric that maps a metric pattern to a named failure mode and a concrete correction,
 then hands you the report.
 
 ```
-ln -s "$PWD/skills/agent-flow" ~/.claude/skills/agent-flow
+ln -s "$PWD/skills/pitwall" ~/.claude/skills/pitwall
 ```
 
-Then ask Claude Code "how am I doing with agents" or invoke `/agent-flow`.
+Then ask Claude Code "how am I doing with agents" or invoke `/pitwall`.
 
 ## Privacy
 

@@ -1,4 +1,4 @@
-"""Self-check: python3 test_agentflow.py
+"""Self-check: python3 test_pitwall.py
 
 Builds a synthetic session log with a known answer and asserts the pipeline
 reproduces it. Covers the two pieces that are easy to break silently: where a
@@ -9,7 +9,7 @@ import os
 import tempfile
 from datetime import datetime, timedelta, timezone
 
-import agentflow as af
+import pitwall as af
 
 T0 = datetime(2026, 1, 2, 12, 0, tzinfo=timezone.utc)
 

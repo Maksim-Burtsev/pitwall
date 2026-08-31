@@ -1,5 +1,5 @@
 <meta charset="utf-8">
-<title>Agent Flow</title>
+<title>Pitwall</title>
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700;12..96,800&family=Instrument+Sans:wght@400;500;600&family=JetBrains+Mono:wght@400;500;700&display=swap">
 <style>
@@ -197,7 +197,7 @@ footer{margin-top:40px;padding-top:16px;border-top:1px solid var(--line);color:v
 </style>
 
 <div class="wrap">
-  <div class="mast"><span class="brand"><i></i>Agent Flow</span><span class="k" id="sub"></span></div>
+  <div class="mast"><span class="brand"><i></i>Pitwall</span><span class="k" id="sub"></span></div>
 
   <div class="hero">
     <div>
@@ -268,7 +268,7 @@ const KINDN = {work:"agent working", you:"you", drift:"reorienting", wait:"starv
 
 /* masthead ------------------------------------------------------------------ */
 $("#sub").textContent = `shift report · last ${D.days_window} days · ${K.n_sessions} sessions · ${K.prompts} prompts`;
-$("#foot").textContent = `logged ${D.generated.slice(0,16).replace("T"," ")} · regenerate: python3 agentflow.py --days ${D.days_window}`;
+$("#foot").textContent = `logged ${D.generated.slice(0,16).replace("T"," ")} · regenerate: python3 pitwall.py --days ${D.days_window}`;
 
 /* hero ---------------------------------------------------------------------- */
 const leverage = K.work_h / Math.max(K.elapsed_h, .01);

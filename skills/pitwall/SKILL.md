@@ -1,9 +1,9 @@
 ---
-name: agent-flow
-description: Analyze how efficiently the user supervises their AI coding agents. Use when they ask about agent productivity, idle time, how many agents to run in parallel, why parallel sessions feel exhausting, whether they are context-switching too much, or ask for a report/timeline/Gantt of their Claude Code sessions. Also on "how am I doing with agents", "am I over-parallelizing", "/agent-flow".
+name: pitwall
+description: Analyze how efficiently the user supervises their AI coding agents. Use when they ask about agent productivity, idle time, how many agents to run in parallel, why parallel sessions feel exhausting, whether they are context-switching too much, or ask for a report/timeline/Gantt of their Claude Code sessions. Also on "how am I doing with agents", "am I over-parallelizing", "/pitwall".
 ---
 
-# Agent Flow
+# Pitwall
 
 Measure the one thing agent-usage dashboards miss: **how much of your agents' time is spent
 waiting for you**, and whether the way you spread attention across sessions makes that better
@@ -40,8 +40,8 @@ It demands the human continuously, so every other session starves while it runs.
 ## Run it
 
 ```bash
-python3 <repo>/agentflow.py --days 14 --json    # metrics for you to read
-python3 <repo>/agentflow.py --days 14           # writes ~/.claude/agent-flow/report.html
+python3 <repo>/pitwall.py --days 14 --json    # metrics for you to read
+python3 <repo>/pitwall.py --days 14           # writes ~/.claude/pitwall/report.html
 ```
 
 Default window is 14 days; `--days 30` for a monthly review, `--days 7` for a weekly one.

@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""agent-flow — measure how much of your AI agents' time is spent waiting for you.
+"""pitwall — measure how much of your AI agents' time is spent waiting for you.
 
 Reads Claude Code session logs (~/.claude/projects/**/*.jsonl), reconstructs when
 each agent was working, when you were with it, and when it sat idle, then renders
@@ -9,7 +9,7 @@ Model: human supervisory control of multiple robots.
   Fan-out (Olsen & Goodrich 2004):        FO = 1 + NT/IT
   Wait times (Cummings & Mitchell 2008):  idle = WTI + WTQ + WTSA
 
-Stdlib only. python3 agentflow.py --help
+Stdlib only. python3 pitwall.py --help
 """
 import argparse
 import json
@@ -604,7 +604,7 @@ def main():
     p = argparse.ArgumentParser(description=__doc__,
                                 formatter_class=argparse.RawDescriptionHelpFormatter)
     p.add_argument("--days", type=int, default=14, help="window to analyze (default 14)")
-    p.add_argument("--out", default=os.path.expanduser("~/.claude/agent-flow/report.html"))
+    p.add_argument("--out", default=os.path.expanduser("~/.claude/pitwall/report.html"))
     p.add_argument("--root", default=os.path.expanduser("~/.claude/projects"))
     p.add_argument("--json", action="store_true", help="dump metrics as JSON to stdout instead")
     a = p.parse_args()
