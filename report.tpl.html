@@ -1,198 +1,266 @@
 <meta charset="utf-8">
 <title>Pitwall</title>
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700;12..96,800&family=Instrument+Sans:wght@400;500;600&family=JetBrains+Mono:wght@400;500;700&display=swap">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@75..125,400..900&family=Spline+Sans+Mono:wght@400;500;700&display=swap">
 <style>
-/* Committed single look: a dark shift board. Painted explicitly so it holds on any host. */
+/* Committed single look: a race engineer's timing sheet. Light paper, navy ink,
+   one racing accent. Painted explicitly so it holds on any host ground. */
 :root{
-  --ground:#0E1114; --panel:#151A1F; --panel2:#1B2128; --line:#252C35; --line2:#1E252C;
-  --ink:#EDF1F4; --ink2:#B2BCC7; --muted:#76818E;
-  --work:#33A67E; --work-hot:#4BE0A6; --you:#6C86EA; --wait:#C8801F; --drift:#BE3D75;
-  --disp:"Bricolage Grotesque","Instrument Sans",ui-sans-serif,system-ui,sans-serif;
-  --sans:"Instrument Sans",ui-sans-serif,system-ui,sans-serif;
-  --mono:"JetBrains Mono",ui-monospace,SFMono-Regular,Menlo,monospace;
+  --paper:#F3F4F6; --panel:#FBFCFD; --line:#D8DCE1; --line2:#E6E9ED; --rule:#18212E;
+  --ink:#18212E; --ink2:#45505C; --muted:#77828D;
+  --work:#D4520E; --work-deep:#A63F06; --work-tint:#F9E4D5;
+  --you:#2E5BD7; --you-tint:#E3EAF9;
+  --wait:#A07C2F; --wait-tint:#F1E9D4;
+  --good:#1B7F4D; --good-tint:#E2F0E8;
+  --sans:"Archivo",ui-sans-serif,system-ui,"Helvetica Neue",sans-serif;
+  --mono:"Spline Sans Mono",ui-monospace,SFMono-Regular,Menlo,monospace;
 }
 *{box-sizing:border-box}
-html{color-scheme:dark}
-body{margin:0;background:var(--ground);color:var(--ink);font-family:var(--sans);font-size:14.5px;line-height:1.5;
+html{color-scheme:light}
+body{margin:0;background:var(--paper);color:var(--ink);font-family:var(--sans);font-size:15px;line-height:1.55;
   -webkit-font-smoothing:antialiased}
-h1,h2,h3{margin:0;font-family:var(--disp);font-weight:700;text-wrap:balance;letter-spacing:-.01em}
-.wrap{max-width:1180px;margin:0 auto;padding:0 24px 96px}
+h1,h2,h3{margin:0;font-weight:700;text-wrap:balance}
+h2{font-stretch:115%;letter-spacing:-.01em}
+.wrap{max-width:1140px;margin:0 auto;padding:0 26px 110px}
 .mono{font-family:var(--mono);font-variant-numeric:tabular-nums}
-.k{font-family:var(--mono);font-size:10.5px;letter-spacing:.14em;text-transform:uppercase;color:var(--muted)}
+.k{font-family:var(--mono);font-size:10.5px;letter-spacing:.13em;text-transform:uppercase;color:var(--muted)}
 a{color:inherit}
+.num{font-variant-numeric:tabular-nums}
+details summary{cursor:pointer}
+details summary:focus-visible{outline:2px solid var(--you);outline-offset:2px}
 
-/* masthead */
-.mast{display:flex;align-items:center;gap:18px;padding:22px 0 18px;border-bottom:1px solid var(--line)}
-.mast .brand{font-family:var(--disp);font-weight:800;font-size:19px;letter-spacing:-.02em}
-.mast .brand i{display:inline-block;width:9px;height:9px;border-radius:50%;background:var(--work-hot);margin:0 8px 1px 0;
-  box-shadow:0 0 0 3px color-mix(in srgb,var(--work-hot) 22%,transparent)}
-.mast .k{margin-left:auto}
+/* masthead: heavy rule, like the top of a timing sheet */
+.mast{display:flex;align-items:baseline;gap:18px;padding:26px 0 14px;border-bottom:3px solid var(--rule)}
+.mast .brand{font-stretch:125%;font-weight:900;font-size:21px;letter-spacing:.02em;text-transform:uppercase}
+.mast .brand i{display:inline-block;width:10px;height:10px;background:var(--work);margin-right:9px;transform:skewX(-12deg)}
+.mast .k{margin-left:auto;text-align:right}
 
 /* hero */
-.hero{display:grid;grid-template-columns:minmax(0,1.25fr) minmax(300px,.9fr);gap:36px;padding:54px 0 40px;align-items:end}
-.hero .big{font-family:var(--disp);font-weight:800;font-size:clamp(84px,13vw,164px);line-height:.86;letter-spacing:-.045em;
-  color:var(--work-hot);font-variant-numeric:tabular-nums}
-.hero .big small{font-size:.22em;letter-spacing:-.01em;color:var(--ink);font-weight:700;margin-left:12px}
-.hero h1{font-size:clamp(22px,2.6vw,30px);line-height:1.2;margin-top:22px;max-width:22ch;font-weight:700}
-.hero h1 b{color:var(--work-hot);font-weight:700}
-.hero p{margin:12px 0 0;color:var(--ink2);max-width:52ch;font-size:15px}
-.spark{display:grid;grid-template-columns:repeat(var(--n),1fr);gap:4px;align-items:end;height:118px;
-  border-bottom:1px solid var(--line);padding-bottom:0}
-.spark div{background:var(--work);border-radius:2px 2px 0 0;position:relative;min-height:2px}
-.spark div.best{background:var(--work-hot)}
-.spark div b{position:absolute;left:0;right:0;top:-18px;text-align:center;font-family:var(--mono);font-size:10px;
+.hero{display:grid;grid-template-columns:minmax(0,1.15fr) minmax(320px,.85fr);gap:48px;padding:52px 0 44px;
+  border-bottom:1px solid var(--line);align-items:start}
+.hero .k{display:block;margin-bottom:10px}
+.hero .big{font-stretch:125%;font-weight:900;font-size:clamp(88px,13vw,160px);line-height:.84;letter-spacing:-.03em;
+  color:var(--work);font-variant-numeric:tabular-nums}
+.hero .big small{display:block;font-size:.16em;letter-spacing:.14em;color:var(--ink);font-weight:700;font-stretch:100%;
+  text-transform:uppercase;margin-top:14px}
+.hero h1{font-size:clamp(19px,2.2vw,25px);line-height:1.35;margin-top:26px;max-width:30ch;font-weight:600;font-stretch:105%}
+.ledger{margin-top:26px;border-top:1px solid var(--line);max-width:560px}
+.ledger .lr{display:grid;grid-template-columns:120px 1fr;gap:16px;padding:11px 0;border-bottom:1px solid var(--line);
+  align-items:baseline}
+.ledger .lr b{font-size:22px;font-weight:800;font-stretch:110%;letter-spacing:-.01em;white-space:nowrap}
+.ledger .lr b.work{color:var(--work)} .ledger .lr b.you{color:var(--you)}
+.ledger .lr .t{font-size:13.5px;color:var(--ink2)}
+.ledger .lr .t strong{color:var(--ink);font-weight:600}
+
+/* per-day bars, hero right */
+.spark-card .cap{font-size:12.5px;color:var(--muted);margin-top:10px}
+.spark{display:grid;grid-template-columns:repeat(var(--n),1fr);gap:5px;align-items:end;height:130px;
+  border-bottom:2px solid var(--rule);margin-top:26px}
+.spark div{background:var(--work-tint);border-top:3px solid var(--work);position:relative;min-height:3px}
+.spark div.best{background:var(--work);border-top-color:var(--work)}
+.spark div b{position:absolute;left:0;right:0;top:-19px;text-align:center;font-family:var(--mono);font-size:10px;
   color:var(--ink2);font-weight:500}
-.spark div.best b{color:var(--work-hot)}
-.sparkl{display:grid;grid-template-columns:repeat(var(--n),1fr);gap:4px;margin-top:6px}
+.spark div.best b{color:var(--work-deep);font-weight:700}
+.sparkl{display:grid;grid-template-columns:repeat(var(--n),1fr);gap:5px;margin-top:6px}
 .sparkl span{font-family:var(--mono);font-size:9.5px;color:var(--muted);text-align:center}
-.side .k{margin-bottom:10px}
-.side .lev{display:flex;gap:22px;margin-top:18px;flex-wrap:wrap}
-.side .lev div b{display:block;font-family:var(--disp);font-weight:700;font-size:26px;letter-spacing:-.02em;line-height:1}
-.side .lev div span{font-size:12px;color:var(--muted)}
+.herostats{display:flex;gap:28px;margin-top:24px;flex-wrap:wrap}
+.herostats div b{display:block;font-weight:800;font-stretch:110%;font-size:24px;letter-spacing:-.01em;line-height:1.1}
+.herostats div span{font-size:12px;color:var(--muted);display:block;max-width:19ch;margin-top:2px;line-height:1.35}
 
-/* section */
-section{margin-top:56px}
-.sh{display:flex;align-items:baseline;gap:16px;flex-wrap:wrap;margin-bottom:18px}
-.sh h2{font-size:24px;letter-spacing:-.02em}
-.sh .n{font-family:var(--mono);font-size:11px;color:var(--muted);letter-spacing:.1em}
-.sh p{margin:0;color:var(--muted);font-size:13.5px;flex:1 1 320px;max-width:64ch}
+/* sections */
+section{margin-top:64px}
+.sh{border-top:3px solid var(--rule);padding-top:14px;margin-bottom:22px}
+.sh h2{font-size:26px}
+.sh p{margin:8px 0 0;color:var(--ink2);font-size:14px;max-width:72ch}
 
-/* your hours: three meters against the day */
-.meters{display:grid;gap:10px}
-.meter{display:grid;grid-template-columns:200px 1fr 92px;gap:16px;align-items:center;padding:12px 16px;
-  background:var(--panel);border:1px solid var(--line);border-radius:4px}
-.meter .l b{display:block;font-family:var(--disp);font-weight:700;font-size:15px}
-.meter .l span{font-size:12px;color:var(--muted)}
-.meter .bar{height:14px;background:var(--panel2);border-radius:3px;overflow:hidden;position:relative}
-.meter .bar i{position:absolute;top:0;bottom:0;left:0;border-radius:3px}
-.meter .v{text-align:right;font-family:var(--disp);font-weight:700;font-size:24px;letter-spacing:-.02em;line-height:1}
-.meter .v small{display:block;font-family:var(--mono);font-size:10.5px;color:var(--muted);letter-spacing:.06em;margin-top:3px;font-weight:400}
-.how{display:grid;grid-template-columns:minmax(0,1fr) minmax(280px,.8fr);gap:14px;margin-top:14px}
-.card{background:var(--panel);border:1px solid var(--line);border-radius:4px;padding:16px 18px}
-.card h3{font-size:15px;margin-bottom:8px}
-.card p{margin:0 0 8px;color:var(--ink2);font-size:13.5px;max-width:60ch}
-.card p:last-child{margin:0}
-.hist{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;align-items:end;height:96px;margin-top:10px}
-.hist div{background:var(--you);border-radius:3px 3px 0 0;position:relative}
-.hist div b{position:absolute;left:0;right:0;top:-18px;text-align:center;font-family:var(--mono);font-size:10.5px;color:var(--ink2)}
-.histl{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-top:6px}
+/* the model: anatomy of one turnaround */
+.anat{background:var(--panel);border:1px solid var(--line);padding:22px 24px 18px;margin-bottom:14px}
+.anat .k{display:block;margin-bottom:14px}
+.abar{display:flex;height:34px;border:1px solid var(--line)}
+.abar div{position:relative;height:100%}
+.abar .aw{background:var(--work)} .abar .ar{background:var(--you)} .abar .ad{background:var(--you-tint)}
+.abar .aq{background:repeating-linear-gradient(135deg,var(--wait) 0 3px,var(--wait-tint) 3px 8px)}
+.alab{display:flex;margin-top:8px}
+.alab div{font-size:12px;color:var(--ink2);padding-right:12px;line-height:1.4}
+.alab b{display:block;font-family:var(--mono);font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:var(--ink)}
+.amark{display:flex;justify-content:space-between;font-family:var(--mono);font-size:10px;color:var(--muted);margin-top:6px}
+.facts{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:14px}
+.fact{border-top:1px solid var(--line);padding-top:10px}
+.fact h3{font-size:13px;font-family:var(--mono);font-weight:500;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);margin-bottom:6px}
+.fact p{margin:0;font-size:13.5px;color:var(--ink2)}
+.fact p b{color:var(--ink)}
+
+/* your hours: meters + histogram */
+.meters{display:grid;gap:0;border-top:1px solid var(--line)}
+.meter{display:grid;grid-template-columns:220px 1fr 110px;gap:18px;align-items:center;padding:14px 0;border-bottom:1px solid var(--line)}
+.meter .l b{display:block;font-weight:700;font-size:15px}
+.meter .l span{font-size:12.5px;color:var(--muted)}
+.meter .bar{height:16px;background:var(--panel);border:1px solid var(--line);position:relative}
+.meter .bar i{position:absolute;top:0;bottom:0;left:0}
+.meter .v{text-align:right;font-weight:800;font-stretch:110%;font-size:24px;letter-spacing:-.01em;line-height:1}
+.meter .v small{display:block;font-family:var(--mono);font-size:10px;color:var(--muted);letter-spacing:.05em;margin-top:4px;font-weight:400}
+.how{display:grid;grid-template-columns:minmax(0,1fr) minmax(300px,.9fr);gap:28px;margin-top:26px;align-items:start}
+.how .txt p{margin:0 0 10px;color:var(--ink2);font-size:14px;max-width:60ch}
+.how .txt p b{color:var(--ink)}
+.histwrap{background:var(--panel);border:1px solid var(--line);padding:18px 20px 14px}
+.histwrap h3{font-size:14.5px;margin-bottom:2px}
+.histwrap .sub{font-size:12px;color:var(--muted);margin-bottom:16px}
+.hist{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;align-items:end;height:110px;border-bottom:2px solid var(--rule)}
+.hist div{background:var(--you);position:relative;min-height:2px}
+.hist div b{position:absolute;left:0;right:0;top:-19px;text-align:center;font-family:var(--mono);font-size:10.5px;color:var(--ink2)}
+.histl{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-top:6px}
 .histl span{font-family:var(--mono);font-size:10px;color:var(--muted);text-align:center}
+.hx{font-size:11px;color:var(--muted);text-align:center;margin-top:8px;font-family:var(--mono)}
+.histnote{font-size:13px;color:var(--ink2);margin-top:12px}
+.histnote b{color:var(--ink)}
 
-/* days */
-.day{background:var(--panel);border:1px solid var(--line);border-radius:4px;margin-bottom:12px;overflow:hidden}
-.dh{display:grid;grid-template-columns:150px 1fr auto;gap:18px;align-items:center;padding:12px 16px;border-bottom:1px solid var(--line2)}
-.dh .d{font-family:var(--disp);font-weight:700;font-size:16px}
-.dh .d span{display:block;font-family:var(--mono);font-size:10px;color:var(--muted);letter-spacing:.1em;font-weight:400;margin-top:2px}
-.dh .ah{font-family:var(--disp);font-weight:800;font-size:28px;letter-spacing:-.03em;color:var(--work-hot);line-height:1}
-.dh .ah small{font-family:var(--mono);font-size:10px;letter-spacing:.1em;color:var(--muted);margin-left:8px;font-weight:400}
-.dh .st{display:flex;gap:18px;font-family:var(--mono);font-size:11px;color:var(--muted)}
-.dh .st b{color:var(--ink);font-weight:500}
-.strip{padding:10px 16px 6px}
-.rg{display:grid;grid-template-columns:70px 1fr;gap:12px;align-items:center}
-.rg .lab{font-family:var(--mono);font-size:9.5px;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);text-align:right}
-.ticks{position:relative;height:14px;border-bottom:1px solid var(--line2)}
+/* day cards */
+.legend{display:flex;gap:8px 24px;flex-wrap:wrap;margin-bottom:14px;font-size:12.5px;color:var(--ink2)}
+.legend i{display:inline-block;width:14px;height:11px;vertical-align:-1px;margin-right:6px}
+.day{background:var(--panel);border:1px solid var(--line);margin-bottom:14px}
+.dh{display:flex;gap:26px;align-items:baseline;padding:14px 20px 10px;flex-wrap:wrap}
+.dh .d{font-weight:800;font-stretch:115%;font-size:17px;min-width:118px}
+.dh .d span{display:block;font-family:var(--mono);font-size:10px;color:var(--muted);letter-spacing:.1em;font-weight:400;margin-top:1px}
+.dh .ah{font-weight:900;font-stretch:120%;font-size:30px;letter-spacing:-.02em;color:var(--work);line-height:1}
+.dh .ah small{font-family:var(--mono);font-size:9.5px;letter-spacing:.1em;color:var(--muted);margin-left:7px;font-weight:400;text-transform:uppercase}
+.dh .st{display:flex;gap:20px;font-size:12.5px;color:var(--muted);margin-left:auto;flex-wrap:wrap}
+.dh .st b{color:var(--ink);font-weight:600;font-variant-numeric:tabular-nums}
+.strip{padding:8px 20px 4px}
+.rg{display:grid;grid-template-columns:86px 1fr;gap:10px;align-items:center}
+.rg .lab{font-family:var(--mono);font-size:9.5px;letter-spacing:.09em;text-transform:uppercase;color:var(--muted);text-align:right;line-height:1.3}
+.ticks{position:relative;height:15px}
 .ticks i{position:absolute;bottom:0;width:1px;height:4px;background:var(--line)}
 .ticks span{position:absolute;top:-1px;font-family:var(--mono);font-size:9.5px;color:var(--muted)}
-.ticks em{position:absolute;top:0;font-style:normal;font-size:9px;color:var(--line);transform:translateX(-50%)}
-.trace{position:relative;height:64px;margin-top:6px;background:var(--panel2);border-radius:3px;overflow:visible}
-.trace svg{position:absolute;inset:0;width:100%;height:100%;overflow:visible}
-.trace .dead{position:absolute;top:0;bottom:0;background:repeating-linear-gradient(135deg,color-mix(in srgb,var(--drift) 42%,transparent) 0 3px,transparent 3px 7px)}
-.trace .cut{position:absolute;top:-2px;bottom:-2px;background:var(--panel);z-index:1}
-.trace .yl{position:absolute;left:6px;top:4px;font-family:var(--mono);font-size:9.5px;color:var(--work);letter-spacing:.08em}
-.you{position:relative;height:12px;margin-top:4px}
-.you i{position:absolute;top:0;bottom:0;width:2px;background:var(--you);border-radius:1px;opacity:.9}
-.you .cut{position:absolute;top:-2px;bottom:-2px;background:var(--panel);z-index:1}
-.flags{position:relative;margin:8px 0 2px}
-.flag{position:absolute;font-family:var(--mono);font-size:9.5px;letter-spacing:.03em;padding:1px 6px;border-radius:2px;
-  white-space:nowrap;border:1px solid;background:var(--panel)}
-.notes{padding:8px 16px 12px;border-top:1px solid var(--line2);display:grid;gap:5px}
-.note{display:grid;grid-template-columns:52px 1fr;gap:10px;font-size:13px;align-items:baseline}
-.note time{font-family:var(--mono);font-size:11px;color:var(--muted)}
-.note strong{font-weight:600}
-.note.bad strong{color:var(--drift)} .note.good strong{color:var(--work-hot)}
+.ticks em{position:absolute;top:1px;font-style:normal;font-size:9px;color:var(--muted);transform:translateX(-50%)}
+.conc{position:relative;background:var(--paper);border-bottom:2px solid var(--rule);overflow:visible}
+.conc .band{position:absolute}
+.conc .grid{position:absolute;left:0;right:0;border-top:1px dashed var(--line);pointer-events:none}
+.conc .gl{position:absolute;left:-16px;font-family:var(--mono);font-size:9px;color:var(--muted);transform:translateY(-50%)}
+.conc .deadspan{position:absolute;top:0;bottom:0;background:repeating-linear-gradient(135deg,#C7CCD2 0 2px,transparent 2px 7px)}
+.conc .deadspan b{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);font-family:var(--mono);
+  font-size:9px;color:var(--muted);font-weight:500;background:var(--paper);padding:0 3px;white-space:nowrap}
+.conc .cut,.you .cut,.track .cut{position:absolute;top:-2px;bottom:-2px;background:var(--panel);z-index:1}
+.you{position:relative;height:12px;margin-top:5px}
+.you i{position:absolute;top:0;bottom:0;width:2px;background:var(--you)}
+.chips{display:flex;flex-wrap:wrap;gap:8px;padding:12px 20px 16px}
+.chip{display:inline-flex;align-items:baseline;gap:7px;font-size:12.5px;line-height:1.35;padding:5px 11px;border-radius:999px;
+  border:1px solid;background:var(--panel)}
+.chip time{font-family:var(--mono);font-size:10.5px;opacity:.75}
+.chip.good{border-color:var(--good);color:var(--good);background:var(--good-tint)}
+.chip.grow{border-color:var(--wait);color:#7A5D1E;background:var(--wait-tint)}
+.chip b{font-weight:700}
 details.lanes{border-top:1px solid var(--line2)}
-details.lanes summary{cursor:pointer;padding:8px 16px;font-family:var(--mono);font-size:10.5px;letter-spacing:.1em;
+details.lanes summary{padding:9px 20px;font-family:var(--mono);font-size:10.5px;letter-spacing:.1em;
   text-transform:uppercase;color:var(--muted);list-style:none}
 details.lanes summary::before{content:"+ ";color:var(--ink2)}
-details[open].lanes summary::before{content:"− "}
-.lanes .rg{padding:0 16px}
-.lane{height:16px;margin-bottom:2px}
-.lane .lab{font-size:10.5px;letter-spacing:0;text-transform:none;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.lane .lab b{color:var(--ink2);font-weight:500}
-.lanes .rg.lane{grid-template-columns:200px 1fr}
-.track{position:relative;height:100%;background:var(--panel2);border-radius:2px}
-.bar{position:absolute;top:1px;bottom:1px;min-width:2px;border-radius:1px}
-.bar.work{background:var(--work)} .bar.you{background:var(--you)} .bar.drift{background:var(--drift)}
-.bar.wait{background:repeating-linear-gradient(135deg,color-mix(in srgb,var(--wait) 55%,transparent) 0 2.5px,transparent 2.5px 6px);border-bottom:2px solid var(--wait)}
-.track .cut{position:absolute;top:-1px;bottom:-1px;background:var(--panel);z-index:1}
+details[open].lanes summary::before{content:"- "}
+.lanes .rg{padding:0 20px}
+.lanes .rg.lane{grid-template-columns:210px 1fr}
+.lane{height:17px;margin-bottom:3px}
+.lane .lab{font-size:11px;letter-spacing:0;text-transform:none;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;text-align:right}
+.lane .lab b{color:var(--ink);font-weight:600}
+.lane .lab span{color:var(--muted);font-family:var(--mono);font-size:10px}
+.track{position:relative;height:100%;background:var(--paper)}
+.bar{position:absolute;top:1px;bottom:1px;min-width:2px}
+.bar.work{background:var(--work)} .bar.you{background:var(--you)}
+.bar.wait{background:repeating-linear-gradient(135deg,var(--wait) 0 2.5px,var(--wait-tint) 2.5px 6.5px)}
 .lanes .pad{height:10px}
-.legend{display:flex;gap:6px 22px;flex-wrap:wrap;margin-bottom:12px;font-size:12.5px;color:var(--ink2)}
-.legend i{display:inline-block;width:12px;height:10px;border-radius:2px;vertical-align:-1px;margin-right:6px}
 
 /* projects */
-.proj{display:grid;gap:6px}
-.pr{display:grid;grid-template-columns:170px 1fr 74px 64px;gap:14px;align-items:center;padding:8px 14px;
-  background:var(--panel);border:1px solid var(--line);border-radius:4px}
-.pr .nm{font-family:var(--disp);font-weight:700;font-size:14px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.pr .nm span{display:block;font-family:var(--mono);font-size:10px;color:var(--muted);font-weight:400;letter-spacing:.06em}
-.pr .pbar{height:16px;display:flex;border-radius:3px;overflow:hidden;background:var(--panel2)}
-.pr .pbar i{display:block;height:100%}
-.pr .eff{font-family:var(--disp);font-weight:700;font-size:20px;text-align:right;letter-spacing:-.02em}
-.pr .eff small{display:block;font-family:var(--mono);font-size:9.5px;color:var(--muted);letter-spacing:.08em;font-weight:400}
-.pr .hh{font-family:var(--mono);font-size:11px;color:var(--muted);text-align:right}
-.pr.worst{border-color:color-mix(in srgb,var(--drift) 45%,var(--line))}
-.pr.best{border-color:color-mix(in srgb,var(--work-hot) 45%,var(--line))}
+.ptable{border-top:1px solid var(--line)}
+.phead{display:grid;grid-template-columns:200px 1fr 88px 88px 84px;gap:16px;padding:8px 0;
+  font-family:var(--mono);font-size:9.5px;letter-spacing:.11em;text-transform:uppercase;color:var(--muted)}
+.phead span:nth-child(n+3){text-align:right}
+.pr{border-bottom:1px solid var(--line)}
+.prow{display:grid;grid-template-columns:200px 1fr 88px 88px 84px;gap:16px;align-items:center;padding:11px 0;list-style:none}
+.prow::-webkit-details-marker{display:none}
+.prow .nm{font-weight:700;font-stretch:108%;font-size:14.5px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.prow .nm span{display:block;font-family:var(--mono);font-size:10px;color:var(--muted);font-weight:400}
+.prow .pbar{height:14px;display:flex;background:var(--paper);border:1px solid var(--line2)}
+.prow .pbar i{display:block;height:100%}
+.prow .cell{font-family:var(--mono);font-size:12px;text-align:right;color:var(--ink2);font-variant-numeric:tabular-nums}
+.prow .eff{font-weight:800;font-stretch:110%;font-size:19px;text-align:right;font-family:var(--sans)}
+.prow .eff small{display:block;font-family:var(--mono);font-size:9px;color:var(--muted);letter-spacing:.07em;font-weight:400;text-transform:uppercase}
+.pr[open] .prow{border-bottom:1px dashed var(--line2)}
+.psess{padding:6px 0 12px;display:grid;gap:4px}
+.psess .srow{display:grid;grid-template-columns:minmax(0,1fr) 70px 90px;gap:14px;font-size:12.5px;color:var(--ink2);align-items:baseline}
+.psess .srow em{font-style:normal;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.psess .srow .kd{font-family:var(--mono);font-size:10px;color:var(--muted);text-align:right;text-transform:uppercase;letter-spacing:.06em}
+.psess .srow .wh{font-family:var(--mono);font-size:11px;text-align:right;color:var(--ink)}
+.pfoot{font-size:12.5px;color:var(--muted);margin-top:12px;max-width:78ch}
 
-/* kinds */
-.kinds{display:grid;grid-template-columns:repeat(auto-fit,minmax(190px,1fr));gap:10px}
-.kind{background:var(--panel);border:1px solid var(--line);border-radius:4px;padding:14px 16px}
-.kind h3{font-size:17px;text-transform:capitalize}
-.kind .sub{font-family:var(--mono);font-size:10.5px;color:var(--muted);letter-spacing:.06em;margin:2px 0 12px}
-.kind .row{display:flex;justify-content:space-between;font-size:12.5px;padding:4px 0;border-top:1px solid var(--line2)}
-.kind .row b{font-family:var(--mono);font-weight:500}
-.kind .it{height:6px;background:var(--panel2);border-radius:2px;margin:6px 0 2px;overflow:hidden}
-.kind .it i{display:block;height:100%;background:var(--you)}
-.kind.slow{border-color:color-mix(in srgb,var(--drift) 45%,var(--line))}
-.kind.fast{border-color:color-mix(in srgb,var(--work-hot) 45%,var(--line))}
-.callout{margin-top:12px;padding:14px 18px;border-left:3px solid var(--you);background:var(--panel);border-radius:0 4px 4px 0;
-  font-size:14px;color:var(--ink2);max-width:80ch}
+/* task kinds: paired bars on one minute scale */
+.kinds{border-top:1px solid var(--line)}
+.krow{display:grid;grid-template-columns:190px 1fr;gap:20px;padding:13px 0;border-bottom:1px solid var(--line);align-items:center}
+.krow .kl h3{font-size:16px;text-transform:capitalize;font-stretch:108%}
+.krow .kl span{font-size:12px;color:var(--muted);display:block}
+.krow .kl .ns{font-family:var(--mono);font-size:10.5px;color:var(--muted);margin-top:2px}
+.kbars{display:grid;gap:5px}
+.kbar{display:grid;grid-template-columns:96px 1fr;gap:10px;align-items:center}
+.kbar .t{font-family:var(--mono);font-size:10px;letter-spacing:.06em;color:var(--muted);text-align:right;text-transform:uppercase}
+.kbar .tr{position:relative;height:13px;background:var(--paper);border:1px solid var(--line2)}
+.kbar .tr i{position:absolute;top:0;bottom:0;left:0}
+.kbar .tr b{position:absolute;top:50%;transform:translateY(-50%);font-family:var(--mono);font-size:10.5px;color:var(--ink);
+  font-weight:500;margin-left:5px;padding:0 4px;background:var(--panel);white-space:nowrap}
+.kaxis{display:grid;grid-template-columns:190px 1fr;gap:20px;padding-top:6px}
+.kaxis .ax{position:relative;height:16px;grid-column:2}
+.kaxis .ax i{position:absolute;top:0;width:1px;height:4px;background:var(--line)}
+.kaxis .ax span{position:absolute;top:4px;font-family:var(--mono);font-size:9.5px;color:var(--muted);transform:translateX(-50%)}
+.kaxis .cap{grid-column:2;font-family:var(--mono);font-size:10px;color:var(--muted);margin-top:2px}
+.callout{margin-top:18px;padding:16px 20px;border-left:3px solid var(--you);background:var(--panel);border-top:1px solid var(--line2);
+  border-right:1px solid var(--line2);border-bottom:1px solid var(--line2);font-size:14px;color:var(--ink2);max-width:82ch}
 .callout b{color:var(--ink)}
 
-/* strengths + levers */
-.cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(250px,1fr));gap:10px}
-.good{background:var(--panel);border:1px solid color-mix(in srgb,var(--work-hot) 35%,var(--line));border-radius:4px;padding:16px 18px}
-.good .big{font-family:var(--disp);font-weight:800;font-size:38px;letter-spacing:-.03em;line-height:1;color:var(--work-hot)}
-.good .big small{font-size:14px;color:var(--ink);margin-left:6px;font-weight:700;letter-spacing:0}
-.good h3{font-size:15px;margin:10px 0 4px}
-.good p{margin:0;color:var(--ink2);font-size:13px}
-.levers{display:grid;gap:10px}
-.lever{display:grid;grid-template-columns:64px 1fr 150px;gap:20px;padding:20px 22px;background:var(--panel);
-  border:1px solid var(--line);border-radius:4px;align-items:start}
-.lever .no{font-family:var(--disp);font-weight:800;font-size:44px;letter-spacing:-.04em;line-height:.9;color:var(--muted)}
-.lever h3{font-size:18px;margin-bottom:6px}
-.lever p{margin:0 0 8px;color:var(--ink2);font-size:13.5px;max-width:66ch}
-.lever .do{margin:0;padding:10px 12px;background:var(--panel2);border-radius:3px;font-size:13.5px;color:var(--ink);max-width:66ch}
-.lever .do b{color:var(--work-hot)}
-.lever .gain{text-align:right}
-.lever .gain b{display:block;font-family:var(--disp);font-weight:800;font-size:34px;letter-spacing:-.03em;color:var(--work-hot);line-height:1}
-.lever .gain span{font-family:var(--mono);font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:var(--muted)}
+/* strengths */
+.cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:14px}
+.goodc{background:var(--good-tint);border:1px solid color-mix(in srgb,var(--good) 35%,var(--line));padding:18px 20px;position:relative}
+.goodc .chk{position:absolute;top:14px;right:16px;width:22px;height:22px;border-radius:50%;background:var(--good);color:#fff;
+  display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700}
+.goodc .big{font-weight:900;font-stretch:118%;font-size:36px;letter-spacing:-.02em;line-height:1;color:var(--good)}
+.goodc .big small{font-size:13px;color:var(--ink);margin-left:6px;font-weight:700;font-stretch:100%}
+.goodc h3{font-size:15px;margin:10px 0 4px}
+.goodc p{margin:0;color:var(--ink2);font-size:13px}
+.goodc p b{color:var(--ink)}
 
-/* method */
-.method{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:14px}
-.method .card h3{font-size:13px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);font-family:var(--mono);font-weight:500}
-.method code{font-family:var(--mono);font-size:12px;color:var(--ink)}
-footer{margin-top:40px;padding-top:16px;border-top:1px solid var(--line);color:var(--muted);font-size:11.5px;
+/* levers */
+.levers{display:grid;gap:14px}
+.lever{display:grid;grid-template-columns:58px 1fr 150px;gap:22px;padding:20px 22px;background:var(--panel);
+  border:1px solid var(--line);align-items:start}
+.lever .no{font-weight:900;font-stretch:125%;font-size:40px;letter-spacing:-.02em;line-height:.95;color:var(--line)}
+.lever h3{font-size:18px;margin-bottom:6px;font-stretch:108%}
+.lever p{margin:0 0 10px;color:var(--ink2);font-size:13.5px;max-width:66ch}
+.lever p b{color:var(--ink)}
+.lever .do{margin:0;padding:11px 14px;background:var(--work-tint);border-left:3px solid var(--work);font-size:13.5px;color:var(--ink);max-width:66ch}
+.lever .do .k{display:block;color:var(--work-deep);margin-bottom:3px}
+.lever .gain{text-align:right}
+.lever .gain b{display:block;font-weight:900;font-stretch:115%;font-size:32px;letter-spacing:-.02em;color:var(--work);line-height:1}
+.lever .gain span{font-family:var(--mono);font-size:9.5px;letter-spacing:.1em;text-transform:uppercase;color:var(--muted)}
+.pin{margin-top:18px;background:var(--panel);border:1px solid var(--line);border-top:3px solid var(--rule);padding:16px 20px}
+.pin h3{font-size:14px;font-family:var(--mono);font-weight:700;letter-spacing:.12em;text-transform:uppercase;margin-bottom:10px}
+.pin ul{margin:0;padding:0;list-style:none;display:grid;gap:7px}
+.pin li{font-size:14px;color:var(--ink2);padding-left:22px;position:relative}
+.pin li::before{content:"";position:absolute;left:0;top:6px;width:11px;height:11px;border:2px solid var(--ink2)}
+.pin li b{color:var(--ink)}
+
+/* fine print */
+.fine{display:grid;grid-template-columns:repeat(auto-fit,minmax(250px,1fr));gap:20px}
+.fine .fact p{font-size:13px}
+footer{margin-top:44px;padding-top:14px;border-top:3px solid var(--rule);color:var(--muted);font-size:11.5px;
   font-family:var(--mono);display:flex;gap:24px;flex-wrap:wrap}
 
-#tip{position:fixed;pointer-events:none;z-index:9;background:var(--ink);color:var(--ground);padding:5px 8px;border-radius:3px;
+#tip{position:fixed;pointer-events:none;z-index:9;background:var(--ink);color:var(--paper);padding:6px 9px;
   font-family:var(--mono);font-size:11px;line-height:1.45;white-space:pre;opacity:0;transition:opacity .1s}
 @media (prefers-reduced-motion:reduce){*{transition:none!important}}
-@media (max-width:820px){
-  .hero{grid-template-columns:1fr} .how{grid-template-columns:1fr}
+@media (max-width:860px){
+  .hero{grid-template-columns:1fr;gap:34px}
+  .how{grid-template-columns:1fr}
   .meter{grid-template-columns:1fr;gap:8px} .meter .v{text-align:left}
-  .dh{grid-template-columns:1fr} .pr{grid-template-columns:1fr 1fr} .pr .hh{display:none}
+  .dh .st{margin-left:0}
+  .phead{display:none}
+  .prow{grid-template-columns:1fr 1fr;gap:10px} .prow .cell{display:none}
+  .krow{grid-template-columns:1fr;gap:10px} .kaxis{grid-template-columns:1fr} .kaxis .ax,.kaxis .cap{grid-column:1}
   .lever{grid-template-columns:1fr} .lever .gain{text-align:left}
+  .rg,.lanes .rg.lane{grid-template-columns:60px 1fr}
 }
 </style>
 
@@ -201,57 +269,96 @@ footer{margin-top:40px;padding-top:16px;border-top:1px solid var(--line);color:v
 
   <div class="hero">
     <div>
+      <span class="k" id="herok"></span>
       <div class="big" id="bigno"></div>
       <h1 id="h1"></h1>
-      <p id="hp"></p>
+      <div class="ledger" id="ledger"></div>
     </div>
-    <div class="side">
-      <div class="k">agent-hours per day</div>
+    <div class="spark-card">
+      <span class="k">Agent work per day, hours</span>
       <div class="spark" id="spark"></div><div class="sparkl" id="sparkl"></div>
-      <div class="lev" id="lev"></div>
+      <div class="cap" id="sparkcap"></div>
+      <div class="herostats" id="herostats"></div>
     </div>
   </div>
 
   <section>
-    <div class="sh"><h2 id="yourh"></h2><p>Wall clock: first prompt to last, with any break over 20 minutes cut out. These three overlap — you type while agents run — so they do not add up to the day.</p></div>
-    <div class="meters" id="meters"></div>
-    <div class="how" id="how"></div>
+    <div class="sh"><h2>What this measures</h2>
+      <p>Pitwall reads your local Claude Code session logs and reconstructs, minute by minute, what every agent
+      was doing and where your attention was. The model comes from human supervisory control of multiple robots:
+      the field that answered "how many machines can one person run" long before coding agents existed.</p></div>
+    <div class="anat">
+      <span class="k">Anatomy of one turnaround. This cycle, repeated all day, is everything below.</span>
+      <div class="abar" id="abar"></div>
+      <div class="alab" id="alab"></div>
+    </div>
+    <div class="facts" id="modelfacts"></div>
   </section>
 
   <section>
-    <div class="sh"><h2>Day by day</h2><p>Green is how many agents were running. Blue ticks are your prompts. Hatched is dead air: everything finished, nothing started. The clock skips over long breaks.</p></div>
-    <div class="legend"><span><i style="background:var(--work)"></i>agents running</span><span><i style="background:var(--you)"></i>you prompted</span>
-      <span><i style="background:repeating-linear-gradient(135deg,color-mix(in srgb,var(--drift) 42%,transparent) 0 3px,transparent 3px 7px)"></i>dead air</span></div>
+    <div class="sh"><h2 id="yourh"></h2><p id="yourp"></p></div>
+    <div class="meters" id="meters"></div>
+    <div class="how">
+      <div class="txt" id="howtxt"></div>
+      <div class="histwrap">
+        <h3>How fast you come back</h3>
+        <div class="sub" id="histsub"></div>
+        <div class="hist" id="hist"></div>
+        <div class="histl" id="histl"></div>
+        <div class="hx">time from an agent stopping to your next prompt</div>
+        <div class="histnote" id="histnote"></div>
+      </div>
+    </div>
+  </section>
+
+  <section>
+    <div class="sh"><h2>Day by day</h2>
+      <p>Each chart counts <b style="color:var(--work)">agents running in parallel</b>: height is the number of
+      agents working at that moment, one shade per agent deep. Blue ticks underneath are your prompts. Stippled
+      grey is dead air, when everything had finished and nothing was queued. The clock skips your breaks.</p></div>
+    <div class="legend" id="daylegend"></div>
     <div id="days"></div>
   </section>
 
   <section>
-    <div class="sh"><h2>Where it leaks, by project</h2><p>Green is agent work, blue is your turns, hatched is agents starved while you were elsewhere. Efficiency is the green share. Ranked by hours.</p></div>
-    <div class="proj" id="proj"></div>
+    <div class="sh"><h2>Where the hours went, by project</h2>
+      <p>Every project's total attention, split three ways. Efficiency is the share of that attention that was an
+      agent actually working; the rest was you attending it, or the agent waiting for you. Ranked by agent work.
+      Click a row for its sessions.</p></div>
+    <div class="legend" id="projlegend"></div>
+    <div class="ptable" id="proj"></div>
+    <div class="pfoot" id="projfoot"></div>
   </section>
 
   <section>
-    <div class="sh"><h2>Which tasks make you disappear</h2><p>Sessions sorted by what the agent actually did — edits, searches, shell, or just talking. The blue bar is your median turn: how long an agent waits for your next prompt.</p></div>
+    <div class="sh"><h2>Which tasks hold you longest</h2>
+      <p>Sessions grouped by what the agent actually did. Two bars per type, same minute scale: how long the
+      agent runs unattended, and how long it then waits for your answer. When the blue bar beats the orange one,
+      you are the slower half of that loop.</p></div>
     <div class="kinds" id="kinds"></div>
+    <div class="kaxis" id="kaxis"></div>
     <div class="callout" id="kindnote"></div>
   </section>
 
   <section>
-    <div class="sh"><h2>What you already do well</h2><p>Not encouragement. These are measured, and they are the patterns to copy on the days that go badly.</p></div>
+    <div class="sh"><h2>What already works</h2>
+      <p>Measured, not encouragement. These are the patterns to copy on the days that go badly.</p></div>
     <div class="cards" id="good"></div>
   </section>
 
   <section>
-    <div class="sh"><h2>The three changes</h2><p>Ranked by the agent-hours they give back. Everything else in this report is detail behind these.</p></div>
+    <div class="sh"><h2>The three changes</h2>
+      <p>Ranked by the agent-hours they give back. Everything else in this report is detail behind these.</p></div>
     <div class="levers" id="levers"></div>
+    <div class="pin" id="pin"></div>
   </section>
 
   <section>
-    <div class="sh"><h2>Method</h2></div>
-    <div class="method" id="method"></div>
+    <div class="sh"><h2>Fine print</h2></div>
+    <div class="fine facts" id="fine"></div>
   </section>
 
-  <footer><span>fan-out: Olsen &amp; Goodrich 2004 · wait times: Cummings &amp; Mitchell 2008</span><span id="foot"></span></footer>
+  <footer><span>fan-out: Olsen &amp; Goodrich, CHI 2004. wait decomposition: Cummings &amp; Mitchell, 2008.</span><span id="foot"></span></footer>
 </div>
 <div id="tip"></div>
 
@@ -263,60 +370,107 @@ const hm = s=> s<90 ? Math.round(s)+"s" : s<5400 ? Math.round(s/60)+" min" : (s/
 const pct= x=> Math.round(x*100)+"%";
 const esc= s=> String(s??"").replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
 const hhmm=d=> String(d.getHours()).padStart(2,"0")+":"+String(d.getMinutes()).padStart(2,"0");
-const MIN=6e4, HOUR=36e5;
-const KINDN = {work:"agent working", you:"you", drift:"reorienting", wait:"starved"};
+const MIN=6e4;
+const wd = k=> new Date(k+"T12:00").toLocaleDateString("en-GB",{weekday:"long"});
+/* one shade per depth level: a sequential ramp of the working color */
+const RAMP = ["#F2C29E","#E8934F","#D4520E","#A63F06","#7E3004","#5C2403"];
+const rampAt = i=> RAMP[Math.min(i,RAMP.length-1)];
 
 /* masthead ------------------------------------------------------------------ */
-$("#sub").textContent = `shift report · last ${D.days_window} days · ${K.n_sessions} sessions · ${K.prompts} prompts`;
-$("#foot").textContent = `logged ${D.generated.slice(0,16).replace("T"," ")} · regenerate: python3 pitwall.py --days ${D.days_window}`;
+const dk = D.days.map(d=>d.key).sort();
+const fmtD = k=> new Date(k+"T12:00").toLocaleDateString("en-GB",{day:"numeric",month:"short"});
+$("#sub").textContent = `${fmtD(dk[0])} to ${fmtD(dk[dk.length-1])} · ${K.n_sessions} sessions, ${K.prompts} prompts`;
+$("#foot").textContent = `generated ${D.generated.slice(0,16).replace("T"," ")} · regenerate: python3 pitwall.py --days ${D.days_window}`;
 
 /* hero ---------------------------------------------------------------------- */
 const leverage = K.work_h / Math.max(K.elapsed_h, .01);
 const days = D.days.slice().sort((a,b)=> a.key<b.key?-1:1);
 const best = days.reduce((a,b)=> b.work_h > (a?.work_h??-1) ? b : a, null);
+$("#herok").textContent = `agent work delivered, last ${D.days_window} days`;
 $("#bigno").innerHTML = `${K.work_h.toFixed(1)}<small>agent-hours</small>`;
-$("#h1").innerHTML = `Your agents worked <b>${h(K.work_h)} hours</b> inside <b>${h(K.elapsed_h)} hours</b> of your time.`;
-$("#hp").innerHTML = `That is ${leverage.toFixed(2)} agent-hours for every hour you sat with them. `
-  + (leverage >= 1 ? `Above 1 means the machines out-work your day — the number this report exists to push up.`
-                   : `Below 1 means you are still doing more waiting than they are working. This is the number to push past 1.`)
-  + ` Your best day was <b class="mono">${new Date(best.key+"T12:00").toLocaleDateString("en-GB",{weekday:"long"})}</b>: `
-  + `${best.work_h.toFixed(1)} agent-hours in ${h(best.elapsed_h)} h.`;
+$("#h1").textContent = `While you supervised them, your agents put in ${K.work_h.toFixed(1)} hours of actual work.`;
+
+const levMin = Math.round(leverage*60);
+$("#ledger").innerHTML = [
+  [`${h(K.elapsed_h)} h`, "", `<strong>You, at the desk.</strong> Wall clock from your first prompt to your last each day, with breaks over 20 minutes cut out. This is real time and can never exceed the calendar.`],
+  [`${K.work_h.toFixed(1)} h`, "work", `<strong>Agents, working.</strong> Counted per agent, so parallel runs stack: three agents running one hour is three agent-hours. This is the output your desk time bought.`],
+  [`${leverage.toFixed(2)}&times;`, leverage>=1?"work":"you", `<strong>Leverage.</strong> ${levMin} minutes of agent work for every hour at the desk. ${leverage>=1?"Above 1, the fleet out-works your day.":"Past 1.0, the fleet out-works your day. That is the number this report exists to raise."}`],
+].map(([v,c,t])=>`<div class="lr"><b class="${c}">${v}</b><div class="t">${t}</div></div>`).join("");
 
 $("#spark").style.setProperty("--n", days.length);
 $("#sparkl").style.setProperty("--n", days.length);
 const mx = Math.max(...days.map(d=>d.work_h), .1);
-$("#spark").innerHTML = days.map(d=>`<div class="${d===best?"best":""}" style="height:${Math.max(2,d.work_h/mx*100)}%"><b>${d.work_h.toFixed(1)}</b></div>`).join("");
-$("#sparkl").innerHTML = days.map(d=>`<span>${new Date(d.key+"T12:00").toLocaleDateString("en-GB",{weekday:"short"}).slice(0,2)}</span>`).join("");
-$("#lev").innerHTML = [
-  [leverage.toFixed(2)+"×", "leverage — agent-h per hour of yours"],
-  ["×"+K.peak, "most agents at once"],
-  [K.fanout_actual.toFixed(2), "average running when busy"],
-].map(([v,l])=>`<div><b>${v}</b><span>${l}</span></div>`).join("");
+$("#spark").innerHTML = days.map(d=>`<div class="${d===best?"best":""}" style="height:${Math.max(3,d.work_h/mx*100)}%"><b>${d.work_h.toFixed(1)}</b></div>`).join("");
+$("#sparkl").innerHTML = days.map(d=>`<span>${wd(d.key).slice(0,2)}</span>`).join("");
+$("#sparkcap").innerHTML = `Best day: <b class="num">${wd(best.key)} ${fmtD(best.key)}</b>, ${best.work_h.toFixed(1)} agent-hours. `
+  + `Average ${(K.work_h/Math.max(days.length,1)).toFixed(1)} h per active day.`;
+
+/* peak moment: scan all work spans for the highest overlap */
+let peakAt=null;
+{ const pts=[];
+  for (const day of D.days) for (const l of day.lanes) for (const b of l.bars)
+    if (b.k==="work"){ pts.push([+new Date(b.a),1]); pts.push([+new Date(b.b),-1]); }
+  pts.sort((x,y)=>x[0]-y[0]||x[1]-y[1]);
+  let cur=0,bestN=0;
+  for (const [t,d] of pts){ cur+=d; if (cur>bestN){ bestN=cur; peakAt=t; } }
+}
+$("#herostats").innerHTML = [
+  [`${K.peak}`, `agents at once, your record${peakAt?` (${new Date(peakAt).toLocaleDateString("en-GB",{weekday:"short"})} ${hhmm(new Date(peakAt))})`:""}`],
+  [`${K.fanout_potential.toFixed(1)}`, `agents you can keep fed, measured from your own pace`],
+].map(([v,l])=>`<div><b class="num">${v}</b><span>${l}</span></div>`).join("");
+
+/* the model ----------------------------------------------------------------- */
+$("#abar").innerHTML = [
+  ["aw",30,"agent working"],["ar",17,"you: reading, typing"],["ad",17,"you: finding the thread"],["aq",26,"agent starved"],["aw",10,""],
+].map(([c,w])=>`<div class="${c}" style="width:${w}%"></div>`).join("");
+$("#alab").innerHTML = [
+  [30,"Agent working","Uninterrupted run. Median here: "+hm(K.nt)+"."],
+  [17,"You, hands-on","Reading the output, writing the next prompt."],
+  [17,"Finding the thread","Idle that reading and typing cannot explain: reorientation after a switch."],
+  [26,"Agent starved","You prompted a different session; this one sat ready, waiting."],
+  [10,"",""],
+].map(([w,t,d])=>`<div style="width:${w}%">${t?`<b>${t}</b>${d}`:""}</div>`).join("");
+$("#modelfacts").innerHTML = [
+  ["What is read","Only your own machine: <b>~/.claude/projects</b> session logs. No network, no telemetry. Sessions with no human prompt (SDK runs, subagents) are excluded: nobody was supervising them."],
+  ["The model","Fan-out (Olsen &amp; Goodrich, 2004): one person can feed <b>1&nbsp;+&nbsp;run&nbsp;/&nbsp;turnaround</b> agents. Yours: runs of "+hm(K.nt)+", turnarounds of "+hm(K.it)+", so a ceiling of <b>"+K.fanout_potential.toFixed(1)+" agents</b>. More tabs than that just queue behind you."],
+  ["Where idle goes","Every idle second lands in one account (Cummings &amp; Mitchell, 2008): hands-on time, reorientation, or starvation. The report is those three accounts, itemized."],
+].map(([t,p])=>`<div class="fact"><h3>${t}</h3><p>${p}</p></div>`).join("");
 
 /* your hours ---------------------------------------------------------------- */
-$("#yourh").textContent = `Your ${h(K.elapsed_h)} hours`;
+$("#yourh").textContent = `Your ${h(K.elapsed_h)} hours at the desk`;
+$("#yourp").textContent = `The three states of that time. They overlap, you type while other agents run, so they do not add up to the total.`;
 const E = Math.max(K.elapsed_h, .01);
 $("#meters").innerHTML = [
-  ["Agents were running", "at least one agent busy", K.live_h, "var(--work)"],
-  ["You were hands-on", "reading output, writing the next prompt", K.your_h, "var(--you)"],
-  ["Dead air", "nothing running at all — the leak", K.dead_h, "var(--drift)", true],
+  ["At least one agent running","the machines were earning", K.live_h, "var(--work)"],
+  ["You, hands-on","reading output, writing prompts", K.your_h, "var(--you)"],
+  ["Dead air","nothing running at all: the leak", K.dead_h, "", true],
 ].map(([t,s,v,c,hatch])=>`<div class="meter"><div class="l"><b>${t}</b><span>${s}</span></div>
-  <div class="bar"><i style="width:${Math.min(v/E,1)*100}%;background:${hatch?`repeating-linear-gradient(135deg,${c} 0 4px,color-mix(in srgb,${c} 45%,transparent) 4px 8px)`:c}"></i></div>
-  <div class="v">${h(v)} h<small>${pct(v/E)} of your day</small></div></div>`).join("");
+  <div class="bar"><i style="width:${Math.min(v/E,1)*100}%;background:${hatch?`repeating-linear-gradient(135deg,#B9BFC7 0 4px,#E2E5E9 4px 9px)`:c}"></i></div>
+  <div class="v num">${h(v)} h<small>${pct(v/E)} of desk time</small></div></div>`).join("");
 
 const TH = D.turn_hist, thN = Object.values(TH).reduce((a,b)=>a+b,0)||1, thMax = Math.max(...Object.values(TH),1);
-$("#how").innerHTML = `<div class="card"><h3>How your time is counted</h3>
-  <p>Every time an agent stops, a clock starts. You own that clock until you prompt <em>any</em> session again — the first
-  ${hm(60)}-ish of it is reading and typing, the rest is you finding your place. Prompt a different session and this one starts
-  <b>starving</b> instead: its clock keeps running, but on the agent's account, not yours.</p>
-  <p>Over ${D.days_window} days you sent <b class="mono">${K.prompts}</b> prompts; ${thN} of them answered an agent that had stopped, at a median <b class="mono">${hm(K.it)}</b>. Reading and typing
-  explain <b class="mono">${h(K.wti_h)} h</b> of it; the other <b class="mono">${h(K.wtsa_h)} h</b> is reorientation — the cost of dropping a thread and picking it up.</p></div>
-  <div class="card"><h3>Your turnaround, measured ${thN} times</h3>
-  <div class="hist">${Object.entries(TH).map(([k,v])=>`<div style="height:${v/thMax*100}%"><b>${pct(v/thN)}</b></div>`).join("")}</div>
-  <div class="histl">${Object.keys(TH).map(k=>`<span>${k}</span>`).join("")}</div>
-  <p style="margin-top:10px">${pct((TH["3-10m"]+TH["10-20m"])/thN)} of your turns run past three minutes. A run lasts ${hm(K.nt)}, so most of the time an agent waits longer for you than it worked.</p></div>`;
+$("#howtxt").innerHTML = `
+  <p>Every time an agent stops, a clock starts, and you own it until you prompt any session again.
+  The first stretch is honest work: reading what came back, typing what is next. Prompt a
+  <b>different</b> session and this one starts starving instead; its clock keeps running, but the time is
+  charged to the cost of parallelism, not to you.</p>
+  <p>Across ${D.days_window} days that clock ran ${thN} times, median <b class="mono">${hm(K.it)}</b>.
+  Reading and typing explain about <b class="mono">${h(K.wti_h)} h</b> of it. The remaining
+  <b class="mono">${h(K.wtsa_h)} h</b> is reorientation: the price of dropping a thread and picking it back up.</p>`;
+$("#histsub").textContent = `share of your ${thN} measured turnarounds`;
+$("#hist").innerHTML = Object.entries(TH).map(([k,v])=>`<div style="height:${Math.max(2,v/thMax*100)}%"><b>${pct(v/thN)}</b></div>`).join("");
+$("#histl").innerHTML = Object.keys(TH).map(k=>`<span>${k}</span>`).join("");
+$("#histnote").innerHTML = `${pct((TH["3-10m"]+TH["10-20m"])/thN)} of your answers take over three minutes,
+  while a typical agent run lasts <b class="num">${hm(K.nt)}</b>. Most of the time, an agent waits longer for you than it worked.`;
 
 /* days ---------------------------------------------------------------------- */
+$("#daylegend").innerHTML = [
+  [`background:${RAMP[1]}`,"one agent running"],
+  [`background:${RAMP[3]}`,"more agents stacked"],
+  ["background:var(--you)","your prompt"],
+  ["background:repeating-linear-gradient(135deg,#C7CCD2 0 2px,transparent 2px 7px)","dead air"],
+].map(([s,t])=>`<span><i style="${s}"></i>${t}</span>`).join("");
+
 function scaleFor(spans){
   const build = m=>{ const out=[]; let [s,e]=spans[0];
     for (const [a,b] of spans.slice(1)) { if (a-e<=m) e=Math.max(e,b); else { out.push([s,e]); [s,e]=[a,b]; } }
@@ -332,25 +486,33 @@ function scaleFor(spans){
     if (t<=e || i===win.length-1) return off[i] + Math.max(0,Math.min(t,e)-s)/dur*usable; } };
   return {win,off,W,X,GUT};
 }
-const FLAGC = {starve:"wait", dead:"drift", thrash:"drift", dropped:"muted", clean:"work-hot"};
-const RANK = {starve:4, thrash:3, dead:2, dropped:1, clean:0};
+function levelsFor(spans){ /* spans [ms,ms][] -> {level: merged [ms,ms][]} */
+  const pts=[]; for (const [a,b] of spans){ pts.push([a,1]); pts.push([b,-1]); }
+  pts.sort((x,y)=>x[0]-y[0]||x[1]-y[1]);
+  const out={}; let cur=0,last=null;
+  for (const [t,d] of pts){
+    if (last!==null && cur>0 && t>last) for (let k=1;k<=cur;k++) (out[k]=out[k]||[]).push([last,t]);
+    cur+=d; last=t;
+  }
+  for (const k in out) out[k]=out[k].reduce((acc,s)=>{ const L=acc[acc.length-1];
+    if (L && s[0]-L[1]<1000) L[1]=s[1]; else acc.push([...s]); return acc; },[]);
+  return out;
+}
 function dur(e){ return (new Date(e.end)-new Date(e.start))/1e3; }
+const RANK = {starve:4, thrash:3, dead:2, dropped:1, clean:5};
 function pick(events, n){
   const byKind = {};
   for (const e of events) if (!byKind[e.kind] || dur(e) > dur(byKind[e.kind])) byKind[e.kind] = e;
-  const heads = Object.values(byKind).sort((a,b)=>RANK[b.kind]-RANK[a.kind]);
+  const heads = Object.values(byKind);
   const rest = events.filter(e=>!heads.includes(e)).sort((a,b)=>RANK[b.kind]-RANK[a.kind]||dur(b)-dur(a));
-  return [...heads, ...rest].slice(0,n);
+  return [...heads, ...rest].slice(0,n).sort((a,b)=>new Date(a.start)-new Date(b.start));
 }
-function short(e){ const m=Math.max(1,Math.round(dur(e)/60));
-  return {starve:`${e.n} agents idle ${m}m`, dead:`dead air ${m}m`, thrash:`${e.n} switches`,
-          dropped:`${(e.who||[])[0]||"session"} dropped`, clean:`${m}m unattended`}[e.kind]; }
-const SAY = {
-  starve: e=>`<strong>${e.n} agents sat idle ${hm(dur(e))}</strong> while ${e.holder?`<b>${esc(e.holder)}</b> held you`:"you were elsewhere"}. The extra tabs, paid for by ${esc((e.who||[]).slice(0,3).join(", "))}.`,
-  dead:   e=>`<strong>${hm(dur(e))} of dead air.</strong> Every agent had finished; nothing was queued.`,
-  thrash: e=>`<strong>${e.n} switches in ${hm(dur(e))}.</strong> A thread takes 15–25 min to pick back up; none of these got there.`,
-  dropped:e=>`<strong>${esc((e.who||[])[0]||"a session")}</strong> finished here and was never reopened.`,
-  clean:  e=>`<strong>${hm(dur(e))} unattended</strong> in <b>${esc((e.who||[])[0]||"")}</b>. No questions, no interruptions — the shape to aim for.`,
+const CHIP = {
+  clean:  e=>`<b>${Math.round(dur(e)/60)} min unattended</b> in ${esc((e.who||[])[0]||"a session")}, no questions, no steering`,
+  starve: e=>`<b>${e.n} agents waited ${hm(dur(e))}</b>${e.holder?` behind ${esc(e.holder)}`:""}`,
+  dead:   e=>`<b>${hm(dur(e))} of dead air</b>, all agents done, nothing queued`,
+  thrash: e=>`<b>${e.n} session switches</b> in ${hm(dur(e))}, faster than a thread rebuilds`,
+  dropped:e=>`<b>${esc((e.who||[])[0]||"a session")}</b> finished and was never reopened`,
 };
 
 $("#days").innerHTML = D.days.map(day=>{
@@ -365,136 +527,151 @@ $("#days").innerHTML = D.days.map(day=>{
     if (x-lastX<4) return `<i style="left:${x}%"></i>`; lastX=x;
     return `<i style="left:${x}%"></i><span style="left:${x}%;transform:${an}">${t}</span>`; };
   const ticks = sc.win.map(([s,e],i)=>{ const w=sc.W(i), x0=sc.off[i];
-    return (i?`<em style="left:${x0-sc.GUT/2}%">╱╱</em>`:"") + mark(x0,hhmm(new Date(s))) + (w>9?mark(x0+w,hhmm(new Date(e))):""); }).join("");
+    return (i?`<em style="left:${x0-sc.GUT/2}%">//</em>`:"") + mark(x0,hhmm(new Date(s))) + (w>9?mark(x0+w,hhmm(new Date(e))):""); }).join("");
   const cuts = sc.off.slice(1).map(x=>`<div class="cut" style="left:${x-sc.GUT}%;width:${sc.GUT}%"></div>`).join("");
 
   const work = [];
   for (const l of day.lanes) for (const b of l.bars) if (b.k==="work") work.push([+new Date(b.a), +new Date(b.b)]);
-  const cells = [];
-  sc.win.forEach(([s,e],i)=>{ const w=sc.W(i), n=Math.max(3,Math.round(w*1.1));
-    for (let j=0;j<n;j++) cells.push({x0:sc.off[i]+w*j/n, x1:sc.off[i]+w*(j+1)/n, t0:s+(e-s)*j/n, t1:s+(e-s)*(j+1)/n}); });
-  cells.forEach(c=> c.n = work.reduce((a,[s,e])=>a+Math.max(0,Math.min(e,c.t1)-Math.max(s,c.t0)),0)/Math.max(c.t1-c.t0,1));
-  const full = Math.max(1,...cells.map(c=>c.n));
-  const Y = n=> (60 - Math.min(n/full,1)*54).toFixed(2);
-  let path = `M${cells[0].x0.toFixed(2)},60`;
-  for (const c of cells) path += ` L${c.x0.toFixed(2)},${Y(c.n)} L${c.x1.toFixed(2)},${Y(c.n)}`;
-  const area = path + ` L${cells[cells.length-1].x1.toFixed(2)},60 Z`;
-
-  const dead = day.events.filter(e=>e.kind==="dead").map(e=>{ const a=X(new Date(e.start)), b=X(new Date(e.end));
-    return `<div class="dead" style="left:${a}%;width:${Math.max(b-a,.3)}%"></div>`; }).join("");
+  const levels = levelsFor(work);
+  const peak = Math.max(day.peak, 1), bh = peak>4 ? 13 : 16, H = peak*bh + 6;
+  let bands = "";
+  for (let k=1; k<=peak; k++){
+    for (const [a,b] of (levels[k]||[])){
+      const x0=X(a), x1=X(b);
+      bands += `<div class="band" style="left:${x0}%;width:${Math.max(x1-x0,.25)}%;bottom:${(k-1)*bh}px;height:${bh-1}px;background:${rampAt(k-1)}"></div>`;
+    }
+  }
+  const grid = Array.from({length:peak},(_,i)=>i+1).map(k=>
+    `<div class="grid" style="bottom:${k*bh}px"></div><span class="gl" style="bottom:${(k-.5)*bh}px">${k}</span>`).join("");
+  const dead = day.events.filter(e=>e.kind==="dead").map(e=>{ const a=X(new Date(e.start)), b=X(new Date(e.end)), w=Math.max(b-a,.3);
+    return `<div class="deadspan" style="left:${a}%;width:${w}%">${w>5?`<b>${Math.round(dur(e)/60)}m</b>`:""}</div>`; }).join("");
   const you = day.prompts.map(p=>`<i style="left:${X(new Date(p))}%"></i>`).join("");
 
-  const evs = pick(day.events, 4), rows=[];
-  const flags = evs.map(e=>{ const x=X(new Date(e.start)), w=short(e).length*6.2; let r=0;
-    while (rows[r] && rows[r] > x-2) r++; rows[r]=x+w/10; const c=FLAGC[e.kind];
-    return {r, html:`<div class="flag" style="left:${x}%;top:${r*17}px;color:var(--${c});border-color:color-mix(in srgb,var(--${c}) 45%,transparent);transform:translateX(${x>82?"-100%":"0"})">${esc(short(e))}</div>`}; });
-  const flagH = (Math.max(0,...flags.map(f=>f.r))+1)*17;
+  const chips = pick(day.events, 5).map(e=>{
+    const good = e.kind==="clean";
+    return `<span class="chip ${good?"good":"grow"}">${good?"&#10003;":"&#9650;"}<time>${hhmm(new Date(e.start))}</time><span>${CHIP[e.kind](e)}</span></span>`;
+  }).join("") || `<span class="chip good">&#10003;<span>a quiet day, nothing worth flagging</span></span>`;
 
   const lanes = day.lanes.slice().sort((a,b)=>b.work-a.work).slice(0,14)
     .sort((a,b)=> new Date(a.bars[0].a)-new Date(b.bars[0].a)).map(l=>{
-    const bs = l.bars.map(b=>{ const a=new Date(b.a), z=new Date(b.b), w=Math.max(X(z)-X(a),.22);
-      return `<div class="bar ${b.k}" style="left:${X(a)}%;width:${w}%" data-t="${esc(l.project)} — ${KINDN[b.k]}\n${hhmm(a)}–${hhmm(z)}  ${hm(b.s)}"></div>`; }).join("");
-    return `<div class="rg lane"><div class="lab" title="${esc(l.title)}"><b>${esc(l.project)}</b> · ${esc(l.title)}</div><div class="track">${bs}${cuts}</div></div>`; }).join("");
+    const bs = l.bars.map(b=>{ const a=new Date(b.a), z=new Date(b.b), k=b.k==="drift"?"you":b.k, w=Math.max(X(z)-X(a),.22);
+      const name = {work:"agent working", you:"you attending", wait:"waiting for you"}[k];
+      return `<div class="bar ${k}" style="left:${X(a)}%;width:${w}%" data-t="${esc(l.project)}: ${name}\n${hhmm(a)}-${hhmm(z)}  ${hm(b.s)}"></div>`; }).join("");
+    return `<div class="rg lane"><div class="lab" title="${esc(l.title||l.project)}"><b>${esc(l.project)}</b> <span>${hm(l.work)}</span></div><div class="track">${bs}${cuts}</div></div>`; }).join("");
 
-  const notes = pick(day.events,4).sort((a,b)=>new Date(a.start)-new Date(b.start)).map(e=>
-    `<div class="note ${e.good?"good":"bad"}"><time>${hhmm(new Date(e.start))}</time><div>${SAY[e.kind](e)}</div></div>`).join("")
-    || `<div class="note"><time>—</time><div>Nothing worth flagging.</div></div>`;
-
-  const dt = new Date(day.key+"T12:00"), lv = day.work_h/Math.max(day.elapsed_h,.01);
+  const dt = new Date(day.key+"T12:00");
   return `<div class="day">
     <div class="dh"><div class="d">${dt.toLocaleDateString("en-GB",{weekday:"long"})}<span>${dt.toLocaleDateString("en-GB",{day:"numeric",month:"short"})}</span></div>
-      <div class="ah">${day.work_h.toFixed(1)}<small>agent-hours</small></div>
-      <div class="st"><span>your day <b>${h(day.elapsed_h)} h</b></span><span>hands-on <b>${h(day.your_h)} h</b></span>
-        <span>leverage <b>${lv.toFixed(2)}×</b></span><span>peak <b>×${day.peak}</b></span></div></div>
+      <div class="ah num">${day.work_h.toFixed(1)}<small>agent-hours</small></div>
+      <div class="st"><span>at the desk <b>${h(day.elapsed_h)} h</b></span><span>hands-on <b>${h(day.your_h)} h</b></span>
+        <span>up to <b>${day.peak} agent${day.peak>1?"s":""}</b> at once</span></div></div>
     <div class="strip">
       <div class="rg"><div></div><div class="ticks">${ticks}</div></div>
-      <div class="rg"><div class="lab">agents</div><div class="trace">${dead}
-        <svg viewBox="0 0 100 60" preserveAspectRatio="none"><path d="${area}" fill="var(--work)" fill-opacity=".22"/>
-        <path d="${path}" fill="none" stroke="var(--work)" stroke-width="1.5" vector-effect="non-scaling-stroke" stroke-linejoin="round"/></svg>
-        ${cuts}<span class="yl">peak ×${day.peak}</span></div></div>
-      <div class="rg"><div class="lab">you</div><div class="you">${you}${cuts}</div></div>
-      <div class="rg"><div></div><div class="flags" style="height:${flagH}px">${flags.map(f=>f.html).join("")}</div></div>
+      <div class="rg"><div class="lab">agents<br>running</div><div class="conc" style="height:${H}px">${dead}${bands}${grid}${cuts}</div></div>
+      <div class="rg"><div class="lab">your<br>prompts</div><div class="you">${you}${cuts}</div></div>
     </div>
-    <div class="notes">${notes}</div>
+    <div class="chips">${chips}</div>
     <details class="lanes"><summary>sessions (${day.lanes.length})</summary><div class="pad"></div>${lanes}<div class="pad"></div></details>
   </div>`;
 }).join("");
 
 /* projects ------------------------------------------------------------------ */
+$("#projlegend").innerHTML = [
+  ["background:var(--work)","agent working"],
+  ["background:var(--you)","you attending"],
+  ["background:repeating-linear-gradient(135deg,var(--wait) 0 2.5px,var(--wait-tint) 2.5px 6.5px)","agent waiting for you"],
+].map(([s,t])=>`<span><i style="${s}"></i>${t}</span>`).join("");
 {
   const P = D.projects.filter(p=>p.work_h+p.your_h+p.starved_h >= .3);
-  const mx = Math.max(...P.map(p=>p.work_h+p.your_h+p.starved_h), .1);
-  const eligible = P.filter(p=>p.work_h>=1);
-  const worst = eligible.length ? eligible.reduce((a,b)=>b.efficiency<a.efficiency?b:a) : null;
-  const bestp = eligible.length ? eligible.reduce((a,b)=>b.efficiency>a.efficiency?b:a) : null;
-  $("#proj").innerHTML = P.map(p=>{ const tot=p.work_h+p.your_h+p.starved_h;
-    return `<div class="pr ${p===worst?"worst":p===bestp?"best":""}"><div class="nm">${esc(p.project)}<span>${p.sessions} sessions · ${p.clean} clean runs</span></div>
-      <div class="pbar" style="width:${tot/mx*100}%"><i style="flex:${p.work_h};background:var(--work)" title="agent work ${h(p.work_h)} h"></i>
-        <i style="flex:${p.your_h};background:var(--you)" title="your turns ${h(p.your_h)} h"></i>
-        <i style="flex:${p.starved_h};background:repeating-linear-gradient(135deg,color-mix(in srgb,var(--wait) 55%,transparent) 0 2.5px,transparent 2.5px 6px)" title="starved ${h(p.starved_h)} h"></i></div>
-      <div class="hh">${h(p.work_h)} ah<br>${h(p.your_h+p.starved_h)} waiting</div>
-      <div class="eff">${pct(p.efficiency)}<small>${p===worst?"leaks most":p===bestp?"tightest":"efficient"}</small></div></div>`; }).join("");
+  const mxP = Math.max(...P.map(p=>p.work_h+p.your_h+p.starved_h), .1);
+  const small = D.projects.length - P.length;
+  const byProj = {};
+  for (const s of D.sessions) (byProj[s.project]=byProj[s.project]||[]).push(s);
+  $("#proj").innerHTML = `<div class="phead"><span>project</span><span>attention, split</span><span>agent work</span><span>waiting</span><span>efficiency</span></div>`
+   + P.map(p=>{ const tot=p.work_h+p.your_h+p.starved_h;
+    const sess = (byProj[p.project]||[]).slice().sort((a,b)=>b.work_h-a.work_h).slice(0,6).map(s=>
+      `<div class="srow"><em title="${esc(s.title)}">${esc(s.title||"untitled session")}</em><span class="kd">${s.kind}</span><span class="wh">${h(s.work_h)} h</span></div>`).join("")
+      || `<div class="srow"><em>no sessions above threshold</em></div>`;
+    return `<details class="pr"><summary class="prow"><div class="nm">${esc(p.project)}<span>${p.sessions} sessions, ${p.clean} clean runs</span></div>
+      <div class="pbar" style="width:${tot/mxP*100}%"><i style="flex:${p.work_h};background:var(--work)"></i><i style="flex:${p.your_h};background:var(--you)"></i><i style="flex:${p.starved_h};background:repeating-linear-gradient(135deg,var(--wait) 0 2.5px,var(--wait-tint) 2.5px 6.5px)"></i></div>
+      <span class="cell">${h(p.work_h)} h</span><span class="cell">${h(p.your_h+p.starved_h)} h</span>
+      <div class="eff num">${pct(p.efficiency)}<small>working share</small></div></summary>
+      <div class="psess">${sess}</div></details>`; }).join("");
+  $("#projfoot").textContent = small>0 ? `${small} smaller project${small>1?"s":""} under 20 minutes of total attention are not shown.` : "";
 }
 
-/* kinds --------------------------------------------------------------------- */
+/* task kinds ---------------------------------------------------------------- */
 {
   const ORDER = ["fix","build","research","ops","talk"];
-  const DESC = {fix:"errors, failing tests, broken builds", build:"features, refactors, edits", research:"plans, comparisons, explanations", ops:"install, publish, git, shell", talk:"conversation, no tools"};
+  const DESC = {fix:"errors, failing tests, broken builds", build:"features, refactors, edits",
+    research:"plans, comparisons, explanations", ops:"install, publish, git, shell", talk:"conversation, no tools"};
   const ks = ORDER.filter(k=>D.kinds[k] && D.kinds[k].turns>=3).map(k=>({k,...D.kinds[k]}));
-  const mxIT = Math.max(...ks.map(x=>x.it), 1);
+  const mxS = Math.max(...ks.map(x=>Math.max(x.it,x.nt)), 60);
   const slow = ks.reduce((a,b)=>b.it>a.it?b:a, ks[0]), fast = ks.reduce((a,b)=>b.it<a.it?b:a, ks[0]);
-  $("#kinds").innerHTML = ks.map(x=>`<div class="kind ${x===slow?"slow":x===fast?"fast":""}"><h3>${x.k}</h3><div class="sub">${DESC[x.k]}</div>
-    <div class="row"><span>your median turn</span><b>${hm(x.it)}</b></div><div class="it"><i style="width:${x.it/mxIT*100}%"></i></div>
-    <div class="row"><span>agent run</span><b>${hm(x.nt)}</b></div>
-    <div class="row"><span>agent-hours</span><b>${h(x.work_h)}</b></div>
-    <div class="row"><span>sessions · turns</span><b>${x.n} · ${x.turns}</b></div>
-    <div class="row"><span>reorienting</span><b>${h(x.drift_h)} h</b></div></div>`).join("");
+  $("#kinds").innerHTML = ks.map(x=>`<div class="krow">
+    <div class="kl"><h3>${x.k}</h3><span>${DESC[x.k]}</span><div class="ns">${x.n} sessions, ${h(x.work_h)} agent-h</div></div>
+    <div class="kbars">
+      <div class="kbar"><span class="t">agent runs</span><div class="tr"><i style="width:${x.nt/mxS*100}%;background:var(--work)"></i><b style="left:${Math.min(x.nt/mxS*100,80)}%">${hm(x.nt)}</b></div></div>
+      <div class="kbar"><span class="t">you answer</span><div class="tr"><i style="width:${x.it/mxS*100}%;background:var(--you)"></i><b style="left:${Math.min(x.it/mxS*100,80)}%">${hm(x.it)}</b></div></div>
+    </div></div>`).join("");
+  const tickStep = mxS>1500 ? 600 : mxS>600 ? 300 : 60;
+  let ax = "";
+  for (let t=0; t<=mxS; t+=tickStep) ax += `<i style="left:calc(106px + (100% - 106px)*${t/mxS})"></i><span style="left:calc(106px + (100% - 106px)*${t/mxS})">${t/60|0}m</span>`;
+  $("#kaxis").innerHTML = `<div></div><div class="ax">${ax}</div><div class="cap">median, minutes. Both bars share this scale.</div>`;
   const held = (D.levers.find(l=>l.kind==="parallel")||{}).evidence?.held_by || {};
   const heldTop = Object.keys(held)[0];
   $("#kindnote").innerHTML = slow && fast && slow!==fast
-    ? `<b>${slow.k}</b> sessions take you ${(slow.it/Math.max(fast.it,1)).toFixed(1)}× longer to answer than <b>${fast.k}</b> (${hm(slow.it)} vs ${hm(fast.it)}). `
+    ? `<b>${slow.k}</b> answers take you ${(slow.it/Math.max(fast.it,1)).toFixed(1)} times longer than <b>${fast.k}</b> (${hm(slow.it)} against ${hm(fast.it)}). `
       + (heldTop ? `When agents starved behind you, the session holding you was most often <b>${heldTop}</b>. ` : "")
       + `Run the fast kind in parallel; give the slow kind the whole screen.`
-    : `Turnaround is flat across task types — the cost is in the switching, not the tasks.`;
+    : `Turnaround is flat across task types: the cost is in the switching, not the tasks.`;
 }
 
 /* strengths ----------------------------------------------------------------- */
 $("#good").innerHTML = D.strengths.map(s=>({
-  clean:   ()=>[`${s.n}`, "clean runs", `Runs of 10 minutes or more with no question and no interruption — the longest ${hm(s.longest)} in <b>${esc(s.where)}</b>. These tasks were specified well enough to be left alone.`],
-  project: ()=>[pct(s.efficiency), esc(s.project), `Your tightest project: ${h(s.work_h)} agent-hours with only ${pct(1-s.efficiency)} of the time spent waiting. Whatever you do there, do it elsewhere.`],
-  fast:    ()=>[hm(s.it), `${s.task} turnaround`, `Median reply on ${s.task} tasks across ${s.turns} turns. That is faster than the agent's own run — the machine is the bottleneck here, not you.`],
-  focus:   ()=>[pct(s.share), "single-threaded", `Share of busy time with exactly one agent running. At a ceiling of ${K.fanout_potential.toFixed(1)} agents, that restraint is correct, not timid.`],
-})[s.kind]()).map(([b,t,p])=>`<div class="good"><div class="big">${b}</div><h3>${t}</h3><p>${p}</p></div>`).join("");
+  clean:   ()=>[`${s.n}`, "clean runs", `Runs of 10 minutes or more with no question and no interruption; the longest, ${hm(s.longest)}, in <b>${esc(s.where)}</b>. These tasks were specified well enough to be left alone.`],
+  project: ()=>[pct(s.efficiency), esc(s.project), `Your tightest project: ${h(s.work_h)} agent-hours with only ${pct(1-s.efficiency)} of its attention spent waiting. Whatever you do here, do it elsewhere.`],
+  fast:    ()=>[hm(s.it), `${s.task} turnaround`, `Median reply on ${s.task} tasks across ${s.turns} turns. Faster than the agent's own run: on these, the machine is the bottleneck, not you.`],
+  focus:   ()=>[pct(s.share), "single-threaded", `Share of busy time with exactly one agent running. At a measured ceiling of ${K.fanout_potential.toFixed(1)} agents, that restraint is correct, not timid.`],
+})[s.kind]()).map(([b,t,p])=>`<div class="goodc"><span class="chk">&#10003;</span><div class="big num">${b}</div><h3>${t}</h3><p>${p}</p></div>`).join("");
 
 /* levers -------------------------------------------------------------------- */
 {
   const T = {
     dispatch: l=>["Never let the queue run empty",
-      `${h(l.evidence.dead_h)} h of your ${h(K.elapsed_h)} — ${pct(l.evidence.share)} — had no agent running at all, across ${l.evidence.windows} separate windows. Not a capacity problem: a dispatch problem. The agents were done and nobody had told them what was next.`,
-      `Before you read an agent's output, <b>write the next prompt for a different session</b>. One queued prompt per idle agent turns dead air into agent-hours at today's parallelism.`],
+      `${h(l.evidence.dead_h)} of your ${h(K.elapsed_h)} desk hours, ${pct(l.evidence.share)}, had no agent running at all, across ${l.evidence.windows} separate windows. Not a capacity problem: a dispatch problem. The agents were done and nobody had told them what was next.`,
+      `Before you read a finished agent's output, write the next prompt for a different session. One queued prompt per idle agent turns dead air into agent-hours.`,
+      "Write the next prompt before reading the last answer."],
     parallel: l=>["Fewer tabs, or cheaper tabs",
-      `${h(l.evidence.starved_h)} agent-hours were agents finished and waiting while you worked another session — ${l.evidence.windows} windows with two or more starving at once.`
+      `${h(l.evidence.starved_h)} agent-hours were agents finished and waiting while you worked another session: ${l.evidence.windows} windows with two or more starving at once.`
       + (Object.keys(l.evidence.held_by).length ? ` The session holding you was most often <b>${Object.keys(l.evidence.held_by)[0]}</b>.` : ""),
-      `Your ceiling is <b>${K.fanout_potential.toFixed(1)}</b> agents. Run ${Math.max(1,Math.floor(K.fanout_potential))} that need you and let the rest be the kind that does not — long, well-specified builds — or do not open them.`],
+      `Your measured ceiling is ${K.fanout_potential.toFixed(1)} agents. Run ${Math.max(1,Math.floor(K.fanout_potential))} that need you, and let the rest be the kind that does not: long, well-specified builds. Or do not open them.`,
+      `Cap parallel sessions at ${Math.max(1,Math.floor(K.fanout_potential))} unless one can run unattended.`],
     reorient: l=>["Group by context, not by urgency",
-      `${h(l.evidence.drift_h)} h of your time went to idle that reading and typing cannot explain — picking a thread back up after ${l.evidence.switches} session switches (${l.evidence.switch_rate.toFixed(1)} an hour).`
-      + (l.evidence.slowest ? ` <b>${l.evidence.slowest}</b> turns take ${hm(l.evidence.slowest_it)}; <b>${l.evidence.fastest}</b> takes ${hm(l.evidence.fastest_it)}.` : ""),
-      `Parallel sessions should share a repo and a mental model. <b>Leave the next step written in the session before you switch</b>, so coming back costs seconds, not the full rebuild.`],
+      `${h(l.evidence.drift_h)} h of your time went to idle that reading and typing cannot explain: picking a thread back up after ${l.evidence.switches} session switches (${l.evidence.switch_rate.toFixed(1)} an hour).`
+      + (l.evidence.slowest ? ` <b>${l.evidence.slowest}</b> answers take ${hm(l.evidence.slowest_it)}; <b>${l.evidence.fastest}</b> takes ${hm(l.evidence.fastest_it)}.` : ""),
+      `Parallel sessions should share a repo and a mental model. Leave the next step written in the session before you switch, so coming back costs seconds, not the full rebuild.`,
+      "Before switching away, write the next step down in the session."],
     dropped: l=>["Close what you open",
-      `${l.count} sessions did real work, finished, and were never reopened — ${esc(l.evidence.names.join(", "))}${l.count>5?", …":""}. Output nobody read.`,
-      `Either <b>review it before starting the next thing</b>, or do not start the session. An unread result is an agent-hour spent for nothing.`],
+      `${l.count} sessions did real work, finished, and were never reopened: ${esc(l.evidence.names.join(", "))}${l.count>5?", and more":""}. Output nobody read.`,
+      `Either review it before starting the next thing, or do not start the session. An unread result is an agent-hour spent for nothing.`,
+      "Reopen and read every finished session before opening a new one."],
   };
-  $("#levers").innerHTML = D.levers.slice(0,3).map((l,i)=>{ const [t,p,d]=T[l.kind](l);
-    return `<div class="lever"><div class="no">${String(i+1).padStart(2,"0")}</div><div><h3>${t}</h3><p>${p}</p><p class="do">${d}</p></div>
-      <div class="gain">${l.hours?`<b>+${h(l.hours)}</b><span>agent-hours back</span>`:`<b>${l.count}</b><span>sessions</span>`}</div></div>`; }).join("");
+  const picked = D.levers.slice(0,3).map(l=>T[l.kind](l));
+  $("#levers").innerHTML = D.levers.slice(0,3).map((l,i)=>{ const [t,p,d]=picked[i];
+    return `<div class="lever"><div class="no">${i+1}</div><div><h3>${t}</h3><p>${p}</p><p class="do"><span class="k">try this</span>${d}</p></div>
+      <div class="gain">${l.hours?`<b class="num">+${h(l.hours)}</b><span>agent-hours back</span>`:`<b class="num">${l.count}</b><span>sessions</span>`}</div></div>`; }).join("");
+  $("#pin").innerHTML = `<h3>Pin above the desk this week</h3><ul>` +
+    picked.map(x=>`<li><b>${x[3]}</b></li>`).join("") + `</ul>`;
 }
 
-/* method -------------------------------------------------------------------- */
-$("#method").innerHTML = `
-  <div class="card"><h3>What counts as work</h3><p>An agent is working while its log events stay under <code>120 s</code> apart — 98.5% of real within-run gaps do. Sessions with no human prompt (SDK, subagents) are dropped: nobody supervised them.</p></div>
-  <div class="card"><h3>Two clocks</h3><p><b>Your hours</b> are wall clock and never exceed the day. <b>Agent-hours</b> run in parallel: ${h(K.work_h)} of them fit inside ${h(K.live_h)} h of yours. Breaks over <code>20 min</code> are cut from both.</p></div>
-  <div class="card"><h3>Whose idle it is</h3><p>You own a stopped agent until you prompt any other session. Reading and typing are estimated at ~1500 and ~200 chars a minute; what is left of your turn is reorientation. After you leave, the agent is starved. The read/type split is an estimate; the rest is measured.</p></div>
-  <div class="card"><h3>Task types</h3><p>From what the agent did: edits and writes → <b>build</b>; searches and fetches with few edits → <b>research</b>; shell without edits → <b>ops</b>; opening prompt about errors → <b>fix</b>. Coarse on purpose — the transcripts hold the real answer.</p></div>`;
+/* fine print ---------------------------------------------------------------- */
+$("#fine").innerHTML = [
+  ["What counts as work","An agent is working while its log events stay under 120 seconds apart; 98.5% of real within-run gaps do. A single tool call slower than that reads as a pause."],
+  ["Two clocks, never mixed","Desk hours are wall clock and can never exceed the day. Agent-hours stack in parallel: "+h(K.work_h)+" of them fit inside "+h(K.live_h)+" wall-clock hours with agents running. Breaks over 20 minutes are cut from both."],
+  ["Measured against estimated","Starvation and dead air are measured directly from timestamps. The split between reading-and-typing and reorientation uses an estimate (about 1500 characters read and 200 typed per minute), so treat that one split as calibrated, not exact."],
+  ["Task types","Coarse on purpose, from what the agent did: mostly edits is <b>build</b>; searches and fetches, <b>research</b>; shell without edits, <b>ops</b>; an opening prompt about errors, <b>fix</b>. The transcripts hold the real answer."],
+].map(([t,p])=>`<div class="fact"><h3>${t}</h3><p>${p}</p></div>`).join("");
 
 /* tooltip ------------------------------------------------------------------- */
 { const tip=$("#tip"); addEventListener("mousemove",e=>{ const b=e.target.closest?.(".bar[data-t]"); if(!b){tip.style.opacity=0;return;}
