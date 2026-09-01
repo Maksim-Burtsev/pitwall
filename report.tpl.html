@@ -59,7 +59,7 @@ header .rulewrap{max-width:220px;margin:2.4em auto 0;border-top:3px double var(-
 /* anatomy: two voices only. Orange is the machine; blue is you; grey is nobody. */
 .anat .abar{display:flex;height:52px}
 .anat .abar > div{height:100%}
-.anat .s-work{background:var(--work)}
+.anat .s-work{background:var(--ink)}
 .anat .s-read{background:var(--you)}
 .anat .s-drift{background:var(--you-lt)}
 .anat .s-queue{background:repeating-linear-gradient(135deg,var(--idle) 0 3px,var(--idle-bg) 3px 9px)}
@@ -70,20 +70,20 @@ header .rulewrap{max-width:220px;margin:2.4em auto 0;border-top:3px double var(-
 .anat .legs div{padding-right:16px;font-size:14px;color:var(--ink2);line-height:1.42}
 .anat .legs b{display:block;font-family:var(--sans);font-size:11px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--ink);margin-bottom:3px}
 
-/* heat actogram */
+/* day strips: solid blocks where agents ran, one overlay tone for parallelism */
 .acto .hours{position:relative;height:18px}
 .acto .hours span{position:absolute;font-family:var(--mono);font-size:10.5px;color:var(--muted);transform:translateX(-50%)}
+.acto .hours i{position:absolute;top:13px;width:1px;height:5px;background:var(--line)}
 .acto .grid{display:grid;grid-template-columns:118px 1fr 56px;gap:0 14px;align-items:center}
 .acto .d{font-family:var(--sans);font-size:12.5px;font-weight:600;text-align:right;line-height:1.25;padding:0}
 .acto .d small{font-family:var(--mono);font-size:10px;color:var(--muted);font-weight:400}
 .acto .tot{font-family:var(--mono);font-size:11px;color:var(--work-deep);text-align:left}
-.acto .strip{display:grid;height:26px;margin:3.5px 0;gap:1px}
-.acto .strip i{background:var(--idle-bg);border-radius:1px}
+.acto .strip{position:relative;height:22px;margin:4px 0;background:var(--idle-bg);border-radius:4px}
+.acto .strip .on{position:absolute;top:0;bottom:0;background:var(--work);border-radius:4px;min-width:3px}
+.acto .strip .two{position:absolute;top:0;bottom:0;background:var(--work-deep);border-radius:4px;min-width:2px}
 .acto .best .d{color:var(--work-deep)}
-.cbar{display:flex;align-items:center;gap:10px;margin-top:18px;font-family:var(--sans);font-size:12.5px;color:var(--ink2);flex-wrap:wrap}
-.cbar .sw{display:flex;gap:2px}
-.cbar .sw i{width:26px;height:12px;border-radius:1px}
-.cbar .cap{font-family:var(--mono);font-size:10.5px;color:var(--muted)}
+.cbar{display:flex;align-items:center;gap:8px 22px;margin-top:18px;font-family:var(--sans);font-size:12.5px;color:var(--ink2);flex-wrap:wrap}
+.cbar i{display:inline-block;width:22px;height:11px;border-radius:3px;margin-right:7px;vertical-align:-1px}
 
 /* radial clock */
 .clockp{display:grid;grid-template-columns:minmax(280px,1fr) minmax(260px,1fr);gap:44px;align-items:center;margin:2em 0}
@@ -218,7 +218,7 @@ footer{text-align:center;padding:3em 0 4em;font-family:var(--mono);font-size:11.
     <div class="abar" id="abar"></div>
     <div class="stops" id="astops"></div>
     <div class="legs" id="alegs"></div>
-    <figcaption>One supervision cycle, drawn to the study's median proportions. Orange is the machine
+    <figcaption>One supervision cycle, drawn to the study's median proportions. Dark is the machine
     working, blue is your attention, grey is nobody's: the agent ready, you elsewhere.</figcaption>
   </figure>
   <p id="s2p2"></p>
@@ -330,7 +330,6 @@ const wd = k=> new Date(k+"T12:00").toLocaleDateString("en-GB",{weekday:"long"})
 const wds= k=> new Date(k+"T12:00").toLocaleDateString("en-GB",{weekday:"short"});
 const fmtD = k=> new Date(k+"T12:00").toLocaleDateString("en-GB",{day:"numeric",month:"short"});
 const fmtDl= k=> new Date(k+"T12:00").toLocaleDateString("en-GB",{day:"numeric",month:"long"});
-const HEAT = ["#F3DCC8","#E8A468","#DD7327","#B34F0C","#7E3004"];
 const days = D.days.slice().sort((a,b)=> a.key<b.key?-1:1);
 const best = days.reduce((a,b)=> b.work_h > (a?.work_h??-1) ? b : a, null);
 const dk = days.map(d=>d.key);
@@ -381,48 +380,60 @@ $("#s2p2").innerHTML = `The median run lasts <b class="num">${hm(K.nt)}</b>. The
   takes <b class="num">${hm(K.it)}</b>. Hold those two numbers; the whole economy of parallel agents hangs
   between them.`;
 
-/* the record: heat actogram -------------------------------------------------- */
+/* the record: day strips ------------------------------------------------------ */
+function mergeMs(spans, slack){
+  spans = spans.slice().sort((a,b)=>a[0]-b[0]);
+  const out=[];
+  for (const [a,b] of spans){ const L=out[out.length-1];
+    if (L && a-L[1]<=slack) L[1]=Math.max(L[1],b); else out.push([a,b]); }
+  return out;
+}
+function atLeastTwo(spans){
+  const pts=[]; for (const [a,b] of spans){ pts.push([a,1]); pts.push([b,-1]); }
+  pts.sort((x,y)=>x[0]-y[0]||x[1]-y[1]);
+  const out=[]; let cur=0,open=null;
+  for (const [t,d] of pts){ cur+=d;
+    if (cur>=2 && open===null) open=t;
+    if (cur<2 && open!==null){ out.push([open,t]); open=null; } }
+  return out;
+}
 let h0=24, h1=0;
-for (const day of days){ const mid=+new Date(day.key+"T00:00");
-  for (const l of day.lanes) for (const b of l.bars){
-    h0=Math.min(h0,(+new Date(b.a)-mid)/36e5); h1=Math.max(h1,Math.min((+new Date(b.b)-mid)/36e5,24)); } }
+const dayWork = days.map(day=>{ const w=[];
+  for (const l of day.lanes) for (const b of l.bars) if (b.k==="work") w.push([+new Date(b.a),+new Date(b.b)]);
+  const mid=+new Date(day.key+"T00:00");
+  for (const [a,b] of w){ h0=Math.min(h0,(a-mid)/36e5); h1=Math.max(h1,Math.min((b-mid)/36e5,24)); }
+  return w; });
 h0=Math.max(0,Math.floor(h0)); h1=Math.min(24,Math.ceil(h1));
-const BIN=1/6, nb=Math.round((h1-h0)/BIN);
-const heat = days.map(day=>{ const mid=+new Date(day.key+"T00:00"), cells=new Array(nb).fill(0);
-  for (const l of day.lanes) for (const b of l.bars) if (b.k==="work"){
-    const a=(+new Date(b.a)-mid)/36e5, z=(+new Date(b.b)-mid)/36e5;
-    for (let i=Math.max(0,Math.floor((a-h0)/BIN)); i<Math.min(nb,Math.ceil((z-h0)/BIN)); i++){
-      const c0=h0+i*BIN, c1=c0+BIN;
-      cells[i]+=Math.max(0,Math.min(z,c1)-Math.max(a,c0));
-    } }
-  return cells; });
-const shade = v=>{ const r=v/BIN; /* avg agents in the slot */
-  return r<.06?null : r<.5?HEAT[0] : r<1.15?HEAT[1] : r<2?HEAT[2] : r<3?HEAT[3] : HEAT[4]; };
-$("#s3h").textContent = `The fortnight, ten minutes at a time`;
-$("#s3p1").innerHTML = `Each row is a day${h1-h0>=23
-    ? `, midnight to midnight; this fortnight touched nearly every hour of the clock`
-    : `, clipped to your actual working window (<span class="num">${String(h0).padStart(2,"0")}:00</span> to <span class="num">${String(h1).padStart(2,"0")}:00</span>; nothing ever ran outside it)`}.
-  Each cell is ten minutes, and its shade is how much agent work landed in it: the darker the cell, the more
-  agents were running at once. One color, one question: when do the machines actually earn?`;
+$("#s3h").textContent = `The fortnight, day by day`;
+$("#s3p1").innerHTML = `Each row is a day${h0>0||h1<24
+    ? ` (the clock is clipped to <span class="num">${String(h0).padStart(2,"0")}:00</span>
+       to <span class="num">${String(h1).padStart(2,"0")}:00</span>; nothing ever ran outside it)`:""}.
+  An <b style="color:var(--work)">orange block</b> means at least one agent was working; the
+  <b style="color:var(--work-deep)">darker stretches</b> inside it, two or more at once. The gaps in
+  between are the fleet standing silent.`;
 const hourTicks = []; for (let hr=h0; hr<=h1; hr+= (h1-h0>12?3:2)) hourTicks.push(hr);
 $("#agrid").innerHTML =
-  `<div></div><div class="hours">${hourTicks.map(hr=>`<span style="left:${(hr-h0)/(h1-h0)*100}%">${String(hr).padStart(2,"0")}:00</span>`).join("")}</div><div></div>`
+  `<div></div><div class="hours">${hourTicks.map(hr=>{ const x=(hr-h0)/(h1-h0)*100;
+     return `<span style="left:${x}%">${String(hr).padStart(2,"0")}:00</span><i style="left:${x}%"></i>`; }).join("")}</div><div></div>`
   + days.map((day,di)=>{
-  const cells = heat[di].map(v=>{ const c=shade(v);
-    return `<i style="${c?`background:${c}`:""}"></i>`; }).join("");
+  const mid=+new Date(day.key+"T00:00");
+  const Xp = t=> Math.max(0,Math.min(100,((t-mid)/36e5-h0)/(h1-h0)*100));
+  const blocks = mergeMs(dayWork[di], 10*6e4).map(([a,b])=>
+    `<div class="on" style="left:${Xp(a)}%;width:${Math.max(Xp(b)-Xp(a),.35)}%"></div>`).join("");
+  const deep = atLeastTwo(dayWork[di]).filter(([a,b])=>b-a>=3*6e4).map(([a,b])=>
+    `<div class="two" style="left:${Xp(a)}%;width:${Math.max(Xp(b)-Xp(a),.25)}%"></div>`).join("");
   return `<div class="d ${day===best?"best":""}">${wds(day.key)} <small>${fmtD(day.key)}</small></div>
-    <div class="strip" style="grid-template-columns:repeat(${nb},1fr)">${cells}</div>
+    <div class="strip">${blocks}${deep}</div>
     <div class="tot">${day.work_h.toFixed(1)} h${day===best?" ●":""}</div>`;
 }).join("");
-$("#cbar").innerHTML = `<span>agents at work in a cell:</span>
-  <span class="sw">${HEAT.map(c=>`<i style="background:${c}"></i>`).join("")}</span>
-  <span class="cap">under 1 &nbsp;→&nbsp; 1 &nbsp;→&nbsp; 2 &nbsp;→&nbsp; 3 &nbsp;→&nbsp; 4+</span>`;
+$("#cbar").innerHTML = `<span><i style="background:var(--work)"></i>agents working</span>
+  <span><i style="background:var(--work-deep)"></i>two or more at once</span>
+  <span><i style="background:var(--idle-bg)"></i>nothing running</span>`;
 $("#actocap").innerHTML = `The best day, <span class="num">${wd(best.key)} ${fmtD(best.key)}</span>,
-  delivered ${best.work_h.toFixed(1)} agent-hours (marked ●). Empty cells inside the window are the fleet
-  standing silent.`;
-$("#s3p2").innerHTML = `Two things stand out. Deep shades are rare: ${pct(K.solo_share)} of busy time ran a
-  single agent, and real parallelism appears only in short bursts. And the light stretches between them are
-  not rest; they are hours inside your working day when nothing had been queued.`;
+  delivered ${best.work_h.toFixed(1)} agent-hours (marked ●).`;
+$("#s3p2").innerHTML = `Two things stand out. The dark stretches are rare: ${pct(K.solo_share)} of busy time
+  ran a single agent, and real parallelism appears only in short bursts. And the gaps between blocks are not
+  rest; they are hours inside your working day when nothing had been queued.`;
 
 /* around the clock ----------------------------------------------------------- */
 const hourly = new Array(24).fill(0), hprompt = new Array(24).fill(0);
