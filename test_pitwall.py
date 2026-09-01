@@ -94,6 +94,8 @@ def main():
         html = af.render(payload, open("report.tpl.html").read())
         assert "/*__DATA__*/null" not in html, "data placeholder was not substituted"
         assert '"fanout_potential"' in html
+        payload["notes"] = {"hours": {"12": "noon"}, "days": {}}
+        assert '"noon"' in af.render(payload, open("report.tpl.html").read())
 
     print("ok")
 

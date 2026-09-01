@@ -607,6 +607,8 @@ def main():
     p.add_argument("--out", default=os.path.expanduser("~/.claude/pitwall/report.html"))
     p.add_argument("--root", default=os.path.expanduser("~/.claude/projects"))
     p.add_argument("--json", action="store_true", help="dump metrics as JSON to stdout instead")
+    p.add_argument("--notes", help='JSON file of model-written summaries: {"hours": {"23": ...}, "days": {"2026-08-25": ...}}')
+    p.add_argument("--no-titles", action="store_true", help="drop session titles (your own prompt text) from the report")
     a = p.parse_args()
 
     since = datetime.now(timezone.utc) - timedelta(days=a.days)
@@ -614,6 +616,14 @@ def main():
     if not sessions:
         sys.exit(f"no human-driven sessions found in {a.root} for the last {a.days} days")
     payload = to_payload(analyze(sessions, since), a.days)
+    if a.notes:
+        payload["notes"] = json.load(open(a.notes))
+    if a.no_titles:
+        for s_ in payload["sessions"]:
+            s_["title"] = ""
+        for d in payload["days"]:
+            for l in d["lanes"]:
+                l["title"] = ""
 
     if a.json:
         json.dump(payload, sys.stdout, ensure_ascii=False, indent=2, default=str)

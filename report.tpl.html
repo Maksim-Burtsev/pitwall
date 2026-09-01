@@ -4,13 +4,16 @@
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Newsreader:ital,opsz,wght@0,6..72,400..800;1,6..72,400..800&family=Archivo:wght@500;600;700&family=IBM+Plex+Mono:wght@400;500&display=swap">
 <style>
 /* A data essay, built to be re-read every week. One committed look: book paper,
-   ink serif, and a two-voice data palette: orange is the machines, blue is you.
-   Waiting is grey, because waiting is the absence of both. */
+   ink serif, and a two-voice data palette. Cobalt is the machines, darker the
+   more of them run at once; rose is you at the desk with the fleet idle, kept
+   scarce. Waiting that belongs to nobody is grey. */
 :root{
-  --paper:#FBFAF6; --ink:#1C1B18; --ink2:#504E47; --muted:#8A867C; --line:#E2DFD6; --rule:#1C1B18;
-  --work:#D4520E; --work-deep:#A63F06;
-  --you:#2E5BD7; --you-lt:#C9D4F1;
-  --idle:#8F8A80; --idle-bg:#EDEBE4; --dead:#C4C1B8; --good:#1B7F4D;
+  --paper:#FBFAF6; --card:#FDFCFA; --ink:#1C1B18; --ink2:#504E47; --muted:#8A867C; --line:#E2DFD6; --rule:#1C1B18;
+  --w1:#C9D6F4; --w15:#8FA9E8; --w2:#6C8EE0; --w3:#1D3FA6;
+  --work:var(--w2); --work-deep:var(--w3);
+  --you:var(--w3); --you-lt:var(--w1);
+  --rose:#C2527A; --rose-bg:#F7E3EB; --rose-ink:#A63E64;
+  --idle:#8F8A80; --idle-bg:#EDEBE4; --dead:#C4C1B8; --good:var(--w3);
   --serif:"Newsreader",Georgia,"Times New Roman",serif;
   --sans:"Archivo",ui-sans-serif,system-ui,sans-serif;
   --mono:"IBM Plex Mono",ui-monospace,Menlo,monospace;
@@ -40,7 +43,7 @@ header h1{font-weight:400;font-size:clamp(52px,9vw,104px);line-height:1.02;lette
 header h1 i{font-style:italic}
 header .statline{font-size:clamp(17px,2.1vw,20px);color:var(--ink);max-width:52ch;margin:0 auto 1.4em;line-height:1.5}
 header .statline .num{font-size:.88em}
-header .statline b.w{color:var(--work)} header .statline b.i{color:var(--ink)}
+header .statline b.w{color:var(--work-deep)} header .statline b.i{color:var(--ink)}
 header .meta{font-family:var(--mono);font-size:12px;color:var(--muted);letter-spacing:.04em}
 header .rulewrap{max-width:220px;margin:2.4em auto 0;border-top:3px double var(--rule)}
 
@@ -54,9 +57,9 @@ header .rulewrap{max-width:220px;margin:2.4em auto 0;border-top:3px double var(-
   font-size:30px;letter-spacing:-.01em;white-space:nowrap}
 .pull{font-size:clamp(24px,3.2vw,31px);line-height:1.35;font-weight:500;font-style:italic;max-width:26ch;margin:1.2em 0}
 .pull b{font-style:normal;font-weight:600}
-.pull b.w{color:var(--work)} .pull b.g{color:var(--idle)}
+.pull b.w{color:var(--work-deep)} .pull b.g{color:var(--idle)}
 
-/* anatomy: two voices only. Orange is the machine; blue is you; grey is nobody. */
+/* anatomy: ink is the machine, cobalt is your attention, grey is nobody. */
 .anat .abar{display:flex;height:52px}
 .anat .abar > div{height:100%}
 .anat .s-work{background:var(--ink)}
@@ -70,7 +73,8 @@ header .rulewrap{max-width:220px;margin:2.4em auto 0;border-top:3px double var(-
 .anat .legs div{padding-right:16px;font-size:14px;color:var(--ink2);line-height:1.42}
 .anat .legs b{display:block;font-family:var(--sans);font-size:11px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--ink);margin-bottom:3px}
 
-/* day strips: solid blocks where agents ran, one overlay tone for parallelism */
+/* day chart: a printed calendar. Blocks are agents working with their length
+   written on them; outlined rose blocks are you at the desk with nothing running. */
 .acto .hours{position:relative;height:18px}
 .acto .hours span{position:absolute;font-family:var(--mono);font-size:10.5px;color:var(--muted);transform:translateX(-50%)}
 .acto .hours i{position:absolute;top:13px;width:1px;height:5px;background:var(--line)}
@@ -78,21 +82,58 @@ header .rulewrap{max-width:220px;margin:2.4em auto 0;border-top:3px double var(-
 .acto .d{font-family:var(--sans);font-size:12.5px;font-weight:600;text-align:right;line-height:1.25;padding:0}
 .acto .d small{font-family:var(--mono);font-size:10px;color:var(--muted);font-weight:400}
 .acto .tot{font-family:var(--mono);font-size:11px;color:var(--work-deep);text-align:left}
-.acto .strip{position:relative;height:22px;margin:4px 0;background:var(--idle-bg);border-radius:4px}
-.acto .strip .on{position:absolute;top:0;bottom:0;background:var(--work);border-radius:4px;min-width:3px}
-.acto .strip .two{position:absolute;top:0;bottom:0;background:var(--work-deep);border-radius:4px;min-width:2px}
+.acto .strip{position:relative;height:26px;margin:4px 0}
+.acto .strip .track{position:absolute;inset:0 0 2px;background:var(--idle-bg);border-radius:3px}
+.acto .blk,.acto .idl{position:absolute;top:0;height:24px;border-radius:3px}
+.acto .blk{background:var(--work)}
+.acto .idl{background:var(--rose-bg);border:1.4px solid var(--rose)}
+.acto .blk b,.acto .idl b{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;
+  font-family:var(--mono);font-size:9.5px;font-weight:500;white-space:nowrap;overflow:hidden}
+.acto .blk b{color:#fff} .acto .idl b{color:var(--rose-ink)}
+.acto .note{grid-column:2/4;font-size:13px;font-style:italic;color:var(--ink2);line-height:1.45;margin:-1px 0 10px;max-width:70ch}
 .acto .best .d{color:var(--work-deep)}
+.cbar .sw-idl{background:var(--rose-bg);border:1.4px solid var(--rose)}
+#tip{position:fixed;pointer-events:none;z-index:9;background:var(--ink);color:var(--paper);padding:7px 10px;border-radius:3px;
+  font-family:var(--mono);font-size:11px;line-height:1.5;white-space:pre;opacity:0;transition:opacity .08s;max-width:360px}
 .cbar{display:flex;align-items:center;gap:8px 22px;margin-top:18px;font-family:var(--sans);font-size:12.5px;color:var(--ink2);flex-wrap:wrap}
 .cbar i{display:inline-block;width:22px;height:11px;border-radius:3px;margin-right:7px;vertical-align:-1px}
 
-/* radial clock */
-.clockp{display:grid;grid-template-columns:minmax(280px,1fr) minmax(260px,1fr);gap:44px;align-items:center;margin:2em 0}
-.clockp svg{width:100%;max-width:430px;height:auto;display:block;margin:0 auto}
-.recs{border-top:1px solid var(--line)}
-.rec{display:grid;grid-template-columns:auto 1fr;gap:18px;padding:12px 0;border-bottom:1px solid var(--line);align-items:baseline}
-.rec b{font-family:var(--serif);font-weight:600;font-size:26px;min-width:92px;text-align:right;font-variant-numeric:tabular-nums}
-.rec div{font-size:14px;color:var(--ink2)}
-.rec div em{font-style:normal;font-family:var(--sans);font-size:10.5px;font-weight:700;color:var(--ink);display:block;letter-spacing:.08em;text-transform:uppercase}
+/* radial clock + hour card */
+.clockp{display:grid;grid-template-columns:minmax(310px,1fr) minmax(320px,.95fr);gap:38px;align-items:start;margin:2em 0}
+.clockp svg{width:100%;max-width:470px;height:auto;display:block;margin:0 auto}
+.clockp .wedge{cursor:pointer}
+.card{border:1px solid var(--line);background:var(--card);box-shadow:0 1px 0 var(--line);position:relative}
+.card::before{content:"";position:absolute;left:0;right:0;top:0;height:3px;background:linear-gradient(90deg,var(--w3),var(--w2))}
+.card .inner{padding:20px 24px 18px}
+.card .ch{display:flex;align-items:baseline;gap:12px;flex-wrap:wrap}
+.card .ch b{font-family:var(--serif);font-size:38px;font-weight:600;letter-spacing:-.01em;font-variant-numeric:tabular-nums;line-height:1}
+.card .ch .arr{font-family:var(--serif);font-size:20px;color:var(--muted)}
+.card .chip{font-family:var(--sans);font-size:10px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;
+  color:var(--w3);background:var(--w1);border:1px solid var(--w15);padding:3px 9px;border-radius:999px;margin-left:auto}
+.card .dayline{position:relative;height:8px;background:var(--idle-bg);border-radius:4px;margin:16px 0 4px}
+.card .dayline i{position:absolute;top:0;bottom:0;border-radius:4px;background:var(--w2)}
+.card .dayline .selh{position:absolute;top:-3px;bottom:-3px;border-radius:4px;background:var(--ink);box-shadow:0 0 0 2px var(--paper)}
+.card .daylab{display:flex;justify-content:space-between;font-family:var(--mono);font-size:9px;color:var(--muted);margin-bottom:14px}
+.card .stats{display:grid;grid-template-columns:1fr 1fr;border-top:1px solid var(--line);border-left:1px solid var(--line)}
+.card .st{border-right:1px solid var(--line);border-bottom:1px solid var(--line);padding:12px 14px 10px}
+.card .st b{display:block;font-family:var(--serif);font-size:26px;font-weight:600;line-height:1;font-variant-numeric:tabular-nums}
+.card .st b small{font-size:15px;color:var(--ink2);font-weight:500}
+.card .st span{display:block;font-family:var(--sans);font-size:10px;font-weight:700;letter-spacing:.09em;text-transform:uppercase;color:var(--muted);margin-top:6px}
+.card .st em{display:block;font-style:normal;font-size:11.5px;color:var(--ink2);margin-top:2px}
+.card .tags{display:flex;flex-wrap:wrap;gap:6px;margin:14px 0 2px}
+.card .tag{font-family:var(--sans);font-size:11.5px;font-weight:600;border:1px solid var(--line);border-radius:999px;
+  padding:3px 11px;color:var(--ink2);background:var(--paper)}
+.card .tag b{color:var(--ink);font-weight:600}
+.card .tag small{font-family:var(--mono);font-size:9.5px;color:var(--muted);margin-left:5px}
+.card .sum{margin-top:16px;border-top:1px solid var(--line);padding-top:12px}
+.card .sum .lab{color:var(--rose-ink);margin-bottom:6px;display:block}
+.card .sum p{font-style:italic;font-size:15.5px;line-height:1.55;color:var(--ink);margin:0}
+.card .empty{padding:30px 0 10px;font-size:15px;color:var(--ink2);font-style:italic}
+.recs{display:grid;grid-template-columns:repeat(4,1fr);gap:0 24px;border-top:1px solid var(--line);margin-top:.6em}
+.rec{padding:14px 0 6px}
+.rec b{display:block;font-family:var(--serif);font-weight:600;font-size:26px;font-variant-numeric:tabular-nums;line-height:1.05}
+.rec div{font-size:13.5px;color:var(--ink2);line-height:1.45;margin-top:4px}
+.rec div em{font-style:normal;font-family:var(--sans);font-size:10.5px;font-weight:700;color:var(--ink);display:block;letter-spacing:.08em;text-transform:uppercase;margin-bottom:2px}
 
 /* decomposition */
 .decomp .dbar{display:flex;height:56px;margin:1.8em 0 0}
@@ -143,7 +184,7 @@ header .rulewrap{max-width:220px;margin:2.4em auto 0;border-top:3px double var(-
 .trow .m small{display:block;font-family:var(--serif);font-weight:400;font-size:12.5px;color:var(--muted)}
 .trow .v{font-family:var(--mono);font-size:14px;text-align:right;font-variant-numeric:tabular-nums}
 .trow .dl{font-family:var(--mono);font-size:13px;text-align:right;white-space:nowrap}
-.dl.up{color:var(--good)} .dl.dn{color:#B3392B} .dl.flat{color:var(--muted)}
+.dl.up{color:var(--good)} .dl.dn{color:var(--rose-ink)} .dl.flat{color:var(--muted)}
 .trendcap{font-style:italic;font-size:15px;color:var(--ink2);margin-top:14px}
 
 /* tomorrow */
@@ -180,7 +221,7 @@ footer{text-align:center;padding:3em 0 4em;font-family:var(--mono);font-size:11.
   .acto .grid{grid-template-columns:64px 1fr 44px}
   .anat .legs,.decomp .dlab{flex-wrap:wrap}
   .anat .legs div,.decomp .dlab div{flex:1 1 40%;margin-bottom:10px}
-  .clockp{grid-template-columns:1fr}
+  .clockp{grid-template-columns:1fr} .recs{grid-template-columns:1fr 1fr}
   .duel{grid-template-columns:1fr}
   .trow{grid-template-columns:1.3fr .6fr .6fr .8fr;gap:8px}
   .mon .mv{grid-template-columns:1fr} .mon .mv::before{display:none} .mon .mv .gain{text-align:left}
@@ -218,8 +259,8 @@ footer{text-align:center;padding:3em 0 4em;font-family:var(--mono);font-size:11.
     <div class="abar" id="abar"></div>
     <div class="stops" id="astops"></div>
     <div class="legs" id="alegs"></div>
-    <figcaption>One supervision cycle, drawn to the study's median proportions. Dark is the machine
-    working, blue is your attention, grey is nobody's: the agent ready, you elsewhere.</figcaption>
+    <figcaption>One supervision cycle, drawn to the study's median proportions. Ink is the machine
+    working, cobalt is your attention, grey is nobody's: the agent ready, you elsewhere.</figcaption>
   </figure>
   <p id="s2p2"></p>
 </div></div>
@@ -249,8 +290,9 @@ footer{text-align:center;padding:3em 0 4em;font-family:var(--mono);font-size:11.
   <div class="wide">
     <div class="clockp">
       <div id="clock"></div>
-      <div class="recs" id="recs"></div>
+      <div class="card" id="card"></div>
     </div>
+    <div class="recs" id="recs"></div>
   </div>
 </div>
 
@@ -317,6 +359,7 @@ footer{text-align:center;padding:3em 0 4em;font-family:var(--mono);font-size:11.
 </div></div>
 
 <footer id="foot"></footer>
+<div id="tip"></div>
 
 <script>
 const D = /*__DATA__*/null;
@@ -380,7 +423,8 @@ $("#s2p2").innerHTML = `The median run lasts <b class="num">${hm(K.nt)}</b>. The
   takes <b class="num">${hm(K.it)}</b>. Hold those two numbers; the whole economy of parallel agents hangs
   between them.`;
 
-/* the record: day strips ------------------------------------------------------ */
+/* the record: the printed calendar -------------------------------------------- */
+const NOTES = D.notes || {};
 function mergeMs(spans, slack){
   spans = spans.slice().sort((a,b)=>a[0]-b[0]);
   const out=[];
@@ -388,93 +432,157 @@ function mergeMs(spans, slack){
     if (L && a-L[1]<=slack) L[1]=Math.max(L[1],b); else out.push([a,b]); }
   return out;
 }
-function atLeastTwo(spans){
+function atLeast(spans,k){
   const pts=[]; for (const [a,b] of spans){ pts.push([a,1]); pts.push([b,-1]); }
   pts.sort((x,y)=>x[0]-y[0]||x[1]-y[1]);
   const out=[]; let cur=0,open=null;
   for (const [t,d] of pts){ cur+=d;
-    if (cur>=2 && open===null) open=t;
-    if (cur<2 && open!==null){ out.push([open,t]); open=null; } }
+    if (cur>=k && open===null) open=t;
+    if (cur<k && open!==null){ out.push([open,t]); open=null; } }
   return out;
 }
+const ovl=(a,b,c0,c1)=> Math.max(0,Math.min(b,c1)-Math.max(a,c0));
+const dur = ms=>{ const m=Math.round(ms/6e4); return m>=90 ? (m/60).toFixed(1)+"h" : m+"m"; };
 let h0=24, h1=0;
-const dayWork = days.map(day=>{ const w=[];
-  for (const l of day.lanes) for (const b of l.bars) if (b.k==="work") w.push([+new Date(b.a),+new Date(b.b)]);
-  const mid=+new Date(day.key+"T00:00");
-  for (const [a,b] of w){ h0=Math.min(h0,(a-mid)/36e5); h1=Math.max(h1,Math.min((b-mid)/36e5,24)); }
-  return w; });
+const prep = days.map(day=>{
+  const mid=+new Date(day.key+"T00:00"), work=[];
+  for (const l of day.lanes) for (const b of l.bars) if (b.k==="work") work.push([+new Date(b.a),+new Date(b.b)]);
+  const w0=Math.min(...work.map(x=>x[0])), w1=Math.max(...work.map(x=>x[1]));
+  const idle=[];
+  for (const e of day.events){
+    if (e.kind!=="dead" && e.kind!=="starve") continue;
+    const a=Math.max(+new Date(e.start), w0), b=Math.min(+new Date(e.end), w1);
+    if (b-a >= 8*6e4) idle.push({a,b,kind:e.kind,n:e.n,holder:e.holder});
+  }
+  for (const [a,b] of work){ h0=Math.min(h0,(a-mid)/36e5); h1=Math.max(h1,Math.min((b-mid)/36e5,24)); }
+  return {day, mid, work, idle};
+});
 h0=Math.max(0,Math.floor(h0)); h1=Math.min(24,Math.ceil(h1));
 $("#s3h").textContent = `The fortnight, day by day`;
 $("#s3p1").innerHTML = `Each row is a day${h0>0||h1<24
     ? ` (the clock is clipped to <span class="num">${String(h0).padStart(2,"0")}:00</span>
        to <span class="num">${String(h1).padStart(2,"0")}:00</span>; nothing ever ran outside it)`:""}.
-  An <b style="color:var(--work)">orange block</b> means at least one agent was working; the
-  <b style="color:var(--work-deep)">darker stretches</b> inside it, two or more at once. The gaps in
-  between are the fleet standing silent.`;
+  A <b style="color:var(--work)">blue block</b> is agents working, its length written on it when there is
+  room. An <b style="color:var(--rose-ink)">outlined block</b> is you at the desk with nothing running, counted
+  only between the day's first and last agent activity. Hover a block for the exact times and, for the outlined
+  ones, the reason.`;
 const hourTicks = []; for (let hr=h0; hr<=h1; hr+= (h1-h0>12?3:2)) hourTicks.push(hr);
+const peakIn = (r,a,b)=>{ let k=1; for (let n=2;n<=4;n++) if (atLeast(r.work,n).some(([c,d])=>ovl(c,d,a,b)>=3*6e4)) k=n; return k; };
 $("#agrid").innerHTML =
   `<div></div><div class="hours">${hourTicks.map(hr=>{ const x=(hr-h0)/(h1-h0)*100;
-     return `<span style="left:${x}%">${String(hr).padStart(2,"0")}:00</span><i style="left:${x}%"></i>`; }).join("")}</div><div></div>`
-  + days.map((day,di)=>{
-  const mid=+new Date(day.key+"T00:00");
-  const Xp = t=> Math.max(0,Math.min(100,((t-mid)/36e5-h0)/(h1-h0)*100));
-  const blocks = mergeMs(dayWork[di], 10*6e4).map(([a,b])=>
-    `<div class="on" style="left:${Xp(a)}%;width:${Math.max(Xp(b)-Xp(a),.35)}%"></div>`).join("");
-  const deep = atLeastTwo(dayWork[di]).filter(([a,b])=>b-a>=3*6e4).map(([a,b])=>
-    `<div class="two" style="left:${Xp(a)}%;width:${Math.max(Xp(b)-Xp(a),.25)}%"></div>`).join("");
+     return `<span style="left:${x}%">${String(hr).padStart(2,"0")}:00</span><i style="left:${x}%">
+     </i>`; }).join("")}</div><div></div>`
+  + prep.map(r=>{
+  const day=r.day;
+  const X = t=> Math.max(0,Math.min(100,((t-r.mid)/36e5-h0)/(h1-h0)*100));
+  const wide = (a,b,px)=> (X(b)-X(a)) > px/7.6;
+  const blocks = mergeMs(r.work, 15*6e4).map(([a,b])=>{ const n=peakIn(r,a,b);
+    return `<div class="blk" style="left:${X(a)}%;width:${Math.max(X(b)-X(a),.5)}%"
+      data-t="${hhmm(new Date(a))}-${hhmm(new Date(b))}  agents working ${hm((b-a)/1e3)}${n>1?`\nup to ${n} at once`:""}">${wide(a,b,34)?`<b>${dur(b-a)}</b>`:""}</div>`; }).join("");
+  const idle = r.idle.map(e=>{
+    const why = e.kind==="dead" ? "nothing queued" : `${e.n||2} agents starved${e.holder?`, behind ${esc(e.holder)}`:""}`;
+    return `<div class="idl" style="left:${X(e.a)}%;width:${Math.max(X(e.b)-X(e.a),.5)}%"
+      data-t="${hhmm(new Date(e.a))}-${hhmm(new Date(e.b))}  at the desk, fleet idle ${hm((e.b-e.a)/1e3)}\n${why}">${wide(e.a,e.b,30)?`<b>${dur(e.b-e.a)}</b>`:""}</div>`; }).join("");
+  const note = NOTES.days?.[day.key] ? `<div class="note">${esc(NOTES.days[day.key])}</div>` : "";
   return `<div class="d ${day===best?"best":""}">${wds(day.key)} <small>${fmtD(day.key)}</small></div>
-    <div class="strip">${blocks}${deep}</div>
-    <div class="tot">${day.work_h.toFixed(1)} h${day===best?" ●":""}</div>`;
+    <div class="strip"><div class="track"></div>${blocks}${idle}</div>
+    <div class="tot">${day.work_h.toFixed(1)} h${day===best?" ●":""}</div>${note}`;
 }).join("");
 $("#cbar").innerHTML = `<span><i style="background:var(--work)"></i>agents working</span>
-  <span><i style="background:var(--work-deep)"></i>two or more at once</span>
-  <span><i style="background:var(--idle-bg)"></i>nothing running</span>`;
+  <span><i class="sw-idl"></i>you at the desk, nothing running</span>
+  <span><i style="background:var(--idle-bg)"></i>nothing, and nobody</span>`;
 $("#actocap").innerHTML = `The best day, <span class="num">${wd(best.key)} ${fmtD(best.key)}</span>,
   delivered ${best.work_h.toFixed(1)} agent-hours (marked ●).`;
-$("#s3p2").innerHTML = `Two things stand out. The dark stretches are rare: ${pct(K.solo_share)} of busy time
-  ran a single agent, and real parallelism appears only in short bursts. And the gaps between blocks are not
-  rest; they are hours inside your working day when nothing had been queued.`;
+$("#s3p2").innerHTML = `Two things stand out. Real parallelism is rare: ${pct(K.solo_share)} of busy time
+  ran a single agent. And the outlined blocks are not rest; they are minutes inside your working day when
+  the fleet stood ready and nothing had been queued.`;
+{ const tip=$("#tip"); addEventListener("mousemove",e=>{ const b=e.target.closest?.("[data-t]"); if(!b){tip.style.opacity=0;return;}
+  tip.textContent=b.dataset.t; tip.style.opacity=1; const r=tip.getBoundingClientRect();
+  tip.style.left=Math.min(e.clientX+14,innerWidth-r.width-8)+"px"; tip.style.top=Math.max(e.clientY-r.height-12,8)+"px"; }); }
 
 /* around the clock ----------------------------------------------------------- */
-const hourly = new Array(24).fill(0), hprompt = new Array(24).fill(0);
-for (const day of D.days){
+const HOURS = Array.from({length:24},()=>({sec:0, prompts:0, proj:{}, days:new Set(), peak:0, peakAt:null}));
+for (const day of days){
+  const spans=[];
   for (const l of day.lanes) for (const b of l.bars) if (b.k==="work"){
     let a=+new Date(b.a), z=+new Date(b.b);
-    while (a<z){ const d0=new Date(a); const hr=d0.getHours();
+    spans.push([a,z]);
+    while (a<z){ const d0=new Date(a), hr=d0.getHours();
       const nxt=Math.min(z, +new Date(d0.getFullYear(),d0.getMonth(),d0.getDate(),hr+1));
-      hourly[hr]+=(nxt-a)/1e3; a=nxt; }
+      const H=HOURS[hr]; H.sec+=(nxt-a)/1e3; H.proj[l.project]=(H.proj[l.project]||0)+(nxt-a)/1e3;
+      if ((nxt-a)>3e5) H.days.add(day.key);
+      a=nxt; }
   }
-  for (const p of day.prompts) hprompt[new Date(p).getHours()]++;
+  for (const p of day.prompts) HOURS[new Date(p).getHours()].prompts++;
+  const pts=[]; for (const [a,z] of spans){ pts.push([a,1]); pts.push([z,-1]); }
+  pts.sort((x,y)=>x[0]-y[0]||x[1]-y[1]);
+  let cur=0;
+  for (const [t,d] of pts){ cur+=d; const H=HOURS[new Date(t).getHours()];
+    if (cur>H.peak){ H.peak=cur; H.peakAt=t; } }
 }
+const mxh = Math.max(...HOURS.map(x=>x.sec),1);
+const busiest = HOURS.findIndex(x=>x.sec===mxh);
+let sel = busiest;
 $("#s35p1").innerHTML = `The same fortnight, folded onto a single clock face. Each wedge is one hour of the
-  day; its length is how much agent work all ${D.days.length} days put into that hour combined. The blue dots
-  outside the dial are your prompts.`;
-{
-  const mxh = Math.max(...hourly,1);
-  const C=220, R0=46, R1=176;
+  day; its length is how much agent work all ${days.length} days put into that hour combined, and the dots
+  outside the dial are your prompts. Hover a wedge to open that hour.`;
+function drawClock(){
+  const C=235, R0=52, R1=186;
   const pol=(r,ang)=>[C+r*Math.sin(ang), C-r*Math.cos(ang)];
-  let paths="";
-  for (let hr=0;hr<24;hr++){
-    const a0=(hr+.07)/24*2*Math.PI, a1=(hr+.93)/24*2*Math.PI;
-    const r = R0 + Math.pow(hourly[hr]/mxh,.7)*(R1-R0);
-    const [x0,y0]=pol(R0,a0),[x1,y1]=pol(r,a0),[x2,y2]=pol(r,a1),[x3,y3]=pol(R0,a1);
-    paths += `<path d="M${x0},${y0} L${x1},${y1} A${r},${r} 0 0 1 ${x2},${y2} L${x3},${y3} A${R0},${R0} 0 0 0 ${x0},${y0}"
-      fill="${hourly[hr]===mxh?"var(--work-deep)":"var(--work)"}" fill-opacity="${hourly[hr]?0.3+hourly[hr]/mxh*.7:0}"/>`;
-    if (hprompt[hr]){ const [px,py]=pol(R1+14,(hr+.5)/24*2*Math.PI);
-      paths += `<circle cx="${px}" cy="${py}" r="${1.3+Math.sqrt(hprompt[hr])*1.3}" fill="var(--you)" fill-opacity=".8"/>`; }
-  }
   let ticks="";
+  for (let hr=0;hr<24;hr++){
+    const ang=hr/24*2*Math.PI, [tx0,ty0]=pol(R1+4,ang), [tx1,ty1]=pol(R1+9,ang);
+    ticks += `<line x1="${tx0}" y1="${ty0}" x2="${tx1}" y2="${ty1}" stroke="var(--muted)" stroke-opacity=".7" stroke-width="1.3"/>`;
+  }
+  let out="";
+  for (let hr=0;hr<24;hr++){
+    const H=HOURS[hr];
+    const a0=(hr+.06)/24*2*Math.PI, a1=(hr+.94)/24*2*Math.PI;
+    const r = R0 + (H.sec?Math.pow(H.sec/mxh,.7):0)*(R1-R0);
+    const fill = !H.sec ? "transparent" : H.sec/mxh<.33 ? "var(--w1)" : H.sec/mxh<.72 ? "var(--w2)" : "var(--w3)";
+    const [x0,y0]=pol(R0,a0),[x1,y1]=pol(r,a0),[x2,y2]=pol(r,a1),[x3,y3]=pol(R0,a1);
+    out += `<path class="wedge" data-hr="${hr}" d="M${x0},${y0} L${x1},${y1} A${r},${r} 0 0 1 ${x2},${y2} L${x3},${y3} A${R0},${R0} 0 0 0 ${x0},${y0}"
+      fill="${fill}" stroke="${hr===sel?"var(--ink)":"var(--paper)"}" stroke-width="${hr===sel?2:1.4}"/>`;
+    if (H.prompts){ const [px,py]=pol(R1+18,(hr+.5)/24*2*Math.PI);
+      out += `<circle cx="${px}" cy="${py}" r="${1.1+Math.sqrt(H.prompts)*1.15}" fill="var(--muted)" fill-opacity=".9"/>`; }
+  }
+  let lbls="";
   for (const hr of [0,6,12,18]){ const [tx,ty]=pol(R1+34,hr/24*2*Math.PI);
-    ticks += `<text x="${tx}" y="${ty}" fill="var(--muted)" font-size="11" font-family="IBM Plex Mono,monospace" text-anchor="middle" dominant-baseline="middle">${String(hr).padStart(2,"0")}:00</text>`; }
-  const busiest = hourly.indexOf(Math.max(...hourly));
-  $("#clock").innerHTML = `<svg viewBox="-34 -12 508 464" role="img" aria-label="agent work by hour of day">
-    <circle cx="${C}" cy="${C}" r="${R0-6}" fill="none" stroke="var(--line)"/>
+    lbls += `<text x="${tx}" y="${ty}" fill="var(--ink2)" font-size="12" font-family="IBM Plex Mono,monospace" text-anchor="middle" dominant-baseline="middle">${String(hr).padStart(2,"0")}:00</text>`; }
+  const SH=HOURS[sel];
+  $("#clock").innerHTML = `<svg viewBox="-34 -10 538 490" role="img" aria-label="agent work by hour of day">
+    <circle cx="${C}" cy="${C}" r="${R0-8}" fill="var(--idle-bg)" stroke="var(--line)"/>
     <circle cx="${C}" cy="${C}" r="${R1}" fill="none" stroke="var(--line)" stroke-dasharray="2 5"/>
-    ${paths}${ticks}
-    <text x="${C}" y="${C-4}" fill="var(--ink)" font-family="Newsreader,serif" font-weight="600" font-size="30" text-anchor="middle">${String(busiest).padStart(2,"0")}:00</text>
-    <text x="${C}" y="${C+16}" fill="var(--muted)" font-size="9" font-family="IBM Plex Mono,monospace" letter-spacing="2" text-anchor="middle">BUSIEST HOUR</text>
+    ${ticks}${out}${lbls}
+    <text x="${C}" y="${C-6}" fill="var(--ink)" font-family="Newsreader,serif" font-weight="600" font-size="27" text-anchor="middle">${String(sel).padStart(2,"0")}:00</text>
+    <text x="${C}" y="${C+15}" fill="var(--ink2)" font-size="10.5" font-family="IBM Plex Mono,monospace" text-anchor="middle">${SH.sec?hm(SH.sec):"quiet"}</text>
   </svg>`;
 }
+function showCard(hr){
+  const H=HOURS[hr];
+  const top = Object.entries(H.proj).sort((a,b)=>b[1]-a[1]).slice(0,4);
+  const chip = hr===busiest ? `<span class="chip">busiest hour</span>` : "";
+  const dl = HOURS.map((x,i)=>{ const v=x.sec/mxh;
+    return v<0.02?"":`<i style="left:${i/24*100}%;width:${100/24*.86}%;opacity:${.25+v*.75}"></i>`; }).join("");
+  const note = NOTES.hours?.[hr];
+  $("#card").innerHTML = `<div class="inner">
+    <div class="ch"><b class="num">${String(hr).padStart(2,"0")}:00</b><span class="arr">to ${String((hr+1)%24).padStart(2,"0")}:00</span>${chip}</div>
+    <div class="dayline">${dl}<span class="selh" style="left:${hr/24*100}%;width:${100/24*.86}%"></span></div>
+    <div class="daylab"><span>00:00</span><span>06:00</span><span>12:00</span><span>18:00</span><span>24:00</span></div>
+    ${H.sec<60 ? `<div class="empty">Nothing ran in this hour, on any of the ${days.length} days. The fleet slept; presumably, so did you.</div>` : `
+    <div class="stats">
+      <div class="st"><b class="num">${hm(H.sec)}</b><span>agent work</span><em>across ${H.days.size} day${H.days.size>1?"s":""} active here</em></div>
+      <div class="st"><b class="num">${H.peak}<small> at once</small></b><span>deepest parallelism</span><em>${H.peakAt?`${wds(new Date(H.peakAt).toISOString().slice(0,10))} ${fmtD(new Date(H.peakAt).toISOString().slice(0,10))}, ${hhmm(new Date(H.peakAt))}`:""}</em></div>
+      <div class="st"><b class="num">${H.prompts}</b><span>your prompts</span><em>sent in this hour, whole window</em></div>
+      <div class="st"><b class="num">${top.length}</b><span>projects</span><em>sharing the hour</em></div>
+    </div>
+    <div class="tags">${top.map(([p,s])=>`<span class="tag"><b>${esc(p)}</b><small>${hm(s)}</small></span>`).join("")}</div>
+    ${note?`<div class="sum"><span class="lab">The hour, summarized</span><p>${esc(note)}</p></div>`:""}`}
+  </div>`;
+}
+addEventListener("pointerover", e=>{ const w=e.target.closest?.(".wedge"); if(!w) return;
+  if (+w.dataset.hr===sel) return; sel=+w.dataset.hr; drawClock(); showCard(sel); });
+drawClock(); showCard(sel);
 let peakAt=null;
 { const pts=[];
   for (const day of D.days) for (const l of day.lanes) for (const b of l.bars)
@@ -511,7 +619,7 @@ $("#s5p1").innerHTML = `Robotics answered this in 2004 with a formula that survi
   plus the one you are currently touching:`;
 $("#ntbars").innerHTML = [
   ["Median agent run", K.nt, "var(--work)"],
-  ["Median turnaround", K.it, "var(--you)"],
+  ["Median turnaround", K.it, "var(--rose)"],
 ].map(([t,v,c])=>`<div class="t">${t}</div><div class="tr"><i style="width:${v/Math.max(K.nt,K.it)*100}%;background:${c}"></i></div><div class="v num">${hm(v)}</div>`).join("");
 {
   const lo=1, hi=Math.max(2.2, K.fanout_potential+.3);
