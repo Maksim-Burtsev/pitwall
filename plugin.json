@@ -1,0 +1,8 @@
+{
+  "name": "pitwall",
+  "version": "1.0.0",
+  "description": "Your AI coding agents spend most of their life waiting for you. Pitwall measures how much, why, and what to change, from local session logs.",
+  "skills": [
+    "./skills/pitwall"
+  ]
+}

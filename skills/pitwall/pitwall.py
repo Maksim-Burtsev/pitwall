@@ -108,7 +108,7 @@ def glob_jsonl(root):
                 yield os.path.join(d, f)
 
 
-def load_sessions(root, since):
+def load_sessions(root, since, until):
     """Sessions with no human prompt are SDK or subagent runs — nobody was
     supervising them, so they have no place in a supervision metric."""
     for path in sorted(glob_jsonl(root)):
@@ -149,7 +149,9 @@ def load_sessions(root, since):
         if not submits or not events:
             continue
         events.sort()
-        if events[-1][0] < since:
+        events = [e for e in events if e[0] < until]
+        submits = [x for x in submits if x[0] < until]
+        if not submits or not events or events[-1][0] < since:
             continue
         yield {"id": os.path.basename(path)[:-6], "project": os.path.basename(os.path.dirname(path)),
                "cwd": cwd or "", "branch": branch, "title": title or first,
@@ -220,7 +222,7 @@ def coverage(spans, floor=1):
 
 # --- the analysis ------------------------------------------------------------
 
-def analyze(sessions, since):
+def analyze(sessions, since, until=None):
     for s in sessions:
         s["runs"] = [r for r in busy_runs(s["events"]) if r["end"] >= since]
         s["submits"] = [x for x in s["submits"] if x[0] >= since]
@@ -596,6 +598,24 @@ def to_payload(res, days):
             "sessions": res["per_session"], "days": out_days}
 
 
+def remember(path, payload, until):
+    """Append this run's headline numbers to history.jsonl and return the earlier
+    runs, so the report can show week over week without keeping old logs around."""
+    k = payload["kpi"]
+    row = {"until": until.strftime("%Y-%m-%d"), "days_window": payload["days_window"],
+           "work": k["work_h"], "desk": k["elapsed_h"], "hands": k["your_h"], "dead": k["dead_h"],
+           "days": len(payload["days"]), "lev": k["work_h"] / k["elapsed_h"] if k["elapsed_h"] else 0,
+           "fo": k["fanout_potential"]}
+    hist = []
+    if os.path.exists(path):
+        hist = [json.loads(l) for l in open(path) if l.strip()]
+    hist = [r for r in hist if r["until"] != row["until"]]   # re-running the same day replaces
+    with open(path, "w") as f:
+        for r in hist + [row]:
+            f.write(json.dumps(r) + "\n")
+    return hist[-8:]
+
+
 def render(payload, template):
     return template.replace("/*__DATA__*/null", json.dumps(payload, ensure_ascii=False))
 
@@ -603,7 +623,8 @@ def render(payload, template):
 def main():
     p = argparse.ArgumentParser(description=__doc__,
                                 formatter_class=argparse.RawDescriptionHelpFormatter)
-    p.add_argument("--days", type=int, default=14, help="window to analyze (default 14)")
+    p.add_argument("--days", type=int, default=7, help="full days before today to analyze (default 7, max 30)")
+    p.add_argument("--today", action="store_true", help="include today (default: the window ends at last midnight)")
     p.add_argument("--out", default=os.path.expanduser("~/.claude/pitwall/report.html"))
     p.add_argument("--root", default=os.path.expanduser("~/.claude/projects"))
     p.add_argument("--json", action="store_true", help="dump metrics as JSON to stdout instead")
@@ -611,10 +632,13 @@ def main():
     p.add_argument("--no-titles", action="store_true", help="drop session titles (your own prompt text) from the report")
     a = p.parse_args()
 
-    since = datetime.now(timezone.utc) - timedelta(days=a.days)
-    sessions = list(load_sessions(a.root, since))
+    a.days = max(1, min(a.days, 30))
+    now = datetime.now().astimezone()
+    until = now if a.today else now.replace(hour=0, minute=0, second=0, microsecond=0)
+    since = until.replace(hour=0, minute=0, second=0, microsecond=0) - timedelta(days=a.days)
+    sessions = list(load_sessions(a.root, since, until))
     if not sessions:
-        sys.exit(f"no human-driven sessions found in {a.root} for the last {a.days} days")
+        sys.exit(f"no human-driven sessions found in {a.root} between {since:%Y-%m-%d} and {until:%Y-%m-%d}")
     payload = to_payload(analyze(sessions, since), a.days)
     if a.notes:
         payload["notes"] = json.load(open(a.notes))
@@ -630,6 +654,8 @@ def main():
         return
     tpl = open(os.path.join(os.path.dirname(os.path.abspath(__file__)), "report.tpl.html")).read()
     os.makedirs(os.path.dirname(a.out) or ".", exist_ok=True)
+    payload["history"] = remember(os.path.join(os.path.dirname(a.out) or ".", "history.jsonl"),
+                                  payload, until)
     open(a.out, "w").write(render(payload, tpl))
     k = payload["kpi"]
     print(f"{a.out}\n"

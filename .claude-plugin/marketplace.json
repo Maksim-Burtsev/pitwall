@@ -1,0 +1,17 @@
+{
+  "$schema": "https://anthropic.com/claude-code/marketplace.schema.json",
+  "name": "pitwall",
+  "description": "Measure how efficiently you supervise your parallel coding agents: agent-hours worked versus waited, the patterns that fire, the three changes that pay.",
+  "owner": {
+    "name": "Maksim Burtsev",
+    "url": "https://github.com/Maksim-Burtsev"
+  },
+  "plugins": [
+    {
+      "name": "pitwall",
+      "description": "One-page report from local session logs: agent-hours delivered and waited, dead air, your fan-out ceiling, the failure patterns that fire, three ranked changes, a day-by-day calendar and an hour-by-hour clock. /pitwall, optionally with a number of days.",
+      "source": "./",
+      "category": "productivity"
+    }
+  ]
+}

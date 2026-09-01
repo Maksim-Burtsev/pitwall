@@ -6,10 +6,12 @@ work run starts and stops, and which account an idle second is charged to.
 """
 import json
 import os
+import sys
 import tempfile
 from datetime import datetime, timedelta, timezone
 
-import pitwall as af
+sys.path.insert(0, os.path.join(os.path.dirname(os.path.abspath(__file__)), "skills", "pitwall"))
+import pitwall as af  # noqa: E402
 
 T0 = datetime(2026, 1, 2, 12, 0, tzinfo=timezone.utc)
 
@@ -55,7 +57,7 @@ def main():
     with tempfile.TemporaryDirectory() as root:
         build(root)
         since = T0 - timedelta(days=1)
-        sessions = list(af.load_sessions(root, since))
+        sessions = list(af.load_sessions(root, since, T0 + timedelta(days=1)))
         assert {s["id"] for s in sessions} == {"a", "b", "c"}, "unsupervised session must be dropped"
 
         res = af.analyze(sessions, since)
@@ -91,11 +93,11 @@ def main():
         assert k["dead_h"] == 0, k["dead_h"]
 
         payload = af.to_payload(res, days=1)
-        html = af.render(payload, open("report.tpl.html").read())
+        html = af.render(payload, open(os.path.join(os.path.dirname(af.__file__), "report.tpl.html")).read())
         assert "/*__DATA__*/null" not in html, "data placeholder was not substituted"
         assert '"fanout_potential"' in html
         payload["notes"] = {"hours": {"12": "noon"}, "days": {}}
-        assert '"noon"' in af.render(payload, open("report.tpl.html").read())
+        assert '"noon"' in af.render(payload, open(os.path.join(os.path.dirname(af.__file__), "report.tpl.html")).read())
 
     print("ok")
 
