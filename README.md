@@ -20,7 +20,10 @@ write, and delivers the report.
 
 ## What you get
 
-A one-page report, built to be re-read every week:
+<p align="center"><img src="assets/report-verdict.png" alt="The verdict: one sentence, four numbers, your ceiling" width="100%"></p>
+
+A one-page report, built to be re-read every week. The full sample, on an anonymized week, is
+[`docs/sample-report.html`](docs/sample-report.html).
 
 - **The verdict.** One sentence, then four numbers: agent-hours delivered, agent-hours waited,
   dead air (desk time with nothing running), and leverage (agent-hours per hour of yours). Under
@@ -29,6 +32,8 @@ A one-page report, built to be re-read every week:
   Human-bound, empty queue, over-parallelized, reorientation tax, thrash, abandoned work.
 - **Three calls.** The changes ranked by agent-hours returned, each as a rule you can apply on
   Monday, with the hours it buys.
+<p align="center"><img src="assets/report-calls.png" alt="What's leaking, and the three calls" width="100%"></p>
+
 - **Keep doing.** Measured strengths: clean unattended runs, single-agent focus, the tightest
   project. The pattern to copy on bad days.
 - **The week, day by day.** A printed calendar: blocks are agents working with their length on
@@ -36,6 +41,9 @@ A one-page report, built to be re-read every week:
 - **Around the clock.** Any day, or all of them folded, on one dial. Hover an hour: agent work,
   deepest parallelism, your prompts, the sessions sharing it, a one-line summary.
 - **Where it leaks**, by task kind and by project, and **this week against last**.
+
+<p align="center"><img src="assets/report-week.png" alt="The week, day by day" width="100%"></p>
+<p align="center"><img src="assets/report-clock.png" alt="Around the clock, one day at a time" width="100%"></p>
 
 The verdict, the day lines and the hour summaries are written by the model running the skill.
 Run the script by hand and the report simply has none.
