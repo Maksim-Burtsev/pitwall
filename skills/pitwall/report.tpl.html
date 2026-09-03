@@ -37,6 +37,14 @@ h3{margin:0 0 8px;font:inherit;display:flex;align-items:baseline;gap:10px;flex-w
 h3 .rv{padding:0 6px}
 h3 .sub{color:var(--dim);text-shadow:none}
 
+.cmd{margin:0 0 10px 2px}
+.cmd:last-child{margin:14px 0 0 2px}
+.cur{display:inline-block;width:.6em;height:1em;background:var(--amber);vertical-align:-2px;animation:blink 1.1s steps(1) infinite}
+@keyframes blink{50%{opacity:0}}
+@media (prefers-reduced-motion:reduce){.cur{animation:none}}
+.head{font-size:1.5em;line-height:1.1;margin:2px 0 8px}
+.lk{display:inline-block;width:4.5em;height:.55em;background:#4A3816;vertical-align:middle;margin-right:8px}
+.lk i{display:block;height:100%;background:var(--fill);box-shadow:0 0 6px rgba(237,165,46,.45)}
 /* verdict */
 .tiles{display:grid;grid-template-columns:1fr 1fr;gap:6px 14px;margin-top:6px}
 .tile .n{display:block;font-size:2em;line-height:1;margin-top:.15em}
@@ -121,6 +129,7 @@ footer{margin-top:24px}
 </style>
 
 <div class="crt">
+  <div class="cmd dim" id="cmd"></div>
   <div class="bar rv" id="top"></div>
   <div class="two">
     <div class="col">
@@ -136,6 +145,7 @@ footer{margin-top:24px}
     </div>
   </div>
   <footer class="bar rv" id="foot"></footer>
+  <div class="cmd dim">$ <span class="cur"></span></div>
 </div>
 <div id="tip"></div>
 
@@ -160,6 +170,7 @@ const ds = K.dead_h/K.elapsed_h;
 /* top and bottom bars ------------------------------------------------------ */
 $("#top").innerHTML = `<span><b>PITWALL</b><span>${fmtD(dk[0])} to ${fmtD(dk[dk.length-1])}</span><span>${K.n_sessions} sessions</span><span>${K.prompts} prompts</span><span>${days.length} active days</span></span>
   <span><span><b>${K.work_h.toFixed(1)} h</b> delivered</span><span><b>${K.idle_h.toFixed(1)} h</b> waited</span><span><b>${pct(ds)}</b> dead air</span></span>`;
+$("#cmd").textContent = `$ pitwall --days ${D.days_window}`;
 $("#foot").innerHTML = `<span><span>local logs only, nothing leaves the machine</span><span>github.com/Maksim-Burtsev/pitwall</span></span><span>${D.days_window} full days before today, re-run weekly</span>`;
 
 /* verdict ------------------------------------------------------------------ */
@@ -178,6 +189,7 @@ const TILES = [
 ];
 { const hi=Math.max(2.5,K.fanout_potential+.4), X=v=>Math.round(v/hi*100);
   $("#verdict").innerHTML = `<h3><span class="rv"> VERDICT </span><span class="sub">${prev ? `against the run of ${fmtD(prev.until)}` : "first run; the comparison fills in next week"}</span></h3>
+    <div class="head"><b>${K.work_h.toFixed(1)} agent-hours</b> in ${h(K.elapsed_h)} desk hours</div>
     <div class="wr">${esc(verdict)}</div>
     <div class="tiles">${TILES.map(t=>`<div class="tile"><b class="n">${t.v}<small>${t.u}</small>${t.d}</b><span class="t">${t.t}</span><span class="e dim">${t.e}</span></div>`).join("")}</div>
     <div class="gauge"><i style="width:${X(K.fanout_actual)}%"></i><u style="width:${X(K.fanout_potential)-X(K.fanout_actual)}%"></u><span class="tick"></span><u style="width:${100-X(K.fanout_potential)}%"></u></div>
@@ -200,7 +212,7 @@ if (K.switch_rate > 4) L.push([K.switch_rate/4, "Thrash", `${K.switch_rate.toFix
     `Output nobody read, sitting on branches. Review a finished session before opening the next, or do not open it.`]); }
 L.sort((a,b)=>b[0]-a[0]);
 $("#leaks").innerHTML = `<h3><span class="rv"> LEAKING </span><span class="sub">${L.length ? `${L.length} pattern${L.length>1?"s":""} fire on your numbers` : "nothing fires"}</span></h3>` +
-  (L.length ? `<div class="list">${L.map(([,t,e,p])=>`<div><div class="h"><span><span class="rv"> ${t.toUpperCase()} </span></span></div><p class="wr">${esc(e)}</p><p class="wr dim">${esc(p)}</p></div>`).join("")}</div>`
+  (L.length ? `<div class="list">${L.map(([sc,t,e,p])=>`<div><div class="h"><span><span class="rv"> ${t.toUpperCase()} </span></span><span><span class="lk" data-t="${sc.toFixed(1)}x the threshold that fires this pattern"><i style="width:${Math.min(sc,3)/3*100}%"></i></span><span class="dim">${sc.toFixed(1)}x</span></span></div><p class="wr">${esc(e)}</p><p class="wr dim">${esc(p)}</p></div>`).join("")}</div>`
    : `<div class="wr">The fleet is fed, the queue is full, and you are not thrashing. Keep the week.</div>`);
 
 /* keep --------------------------------------------------------------------- */
