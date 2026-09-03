@@ -79,6 +79,9 @@ td .hb{display:inline-block;height:.55em;background:var(--fill);vertical-align:m
 .g .c3{background:var(--bright);box-shadow:0 0 9px rgba(255,203,99,.7)}
 .g .ci{background:radial-gradient(circle,#A87A2A 1.5px,transparent 2px)}
 .g .row i:hover{outline:1px solid #FFE3A6;z-index:1}
+.g .lab,.g .row{cursor:pointer}
+.g .lab.sel{background:var(--fill);color:var(--ink);text-shadow:none;padding:0 5px;margin-left:-5px}
+.g .row.sel::before{background:repeating-linear-gradient(to right,rgba(228,160,45,.12) 0 calc(100%/var(--hrs) - 1px),#4A3816 calc(100%/var(--hrs) - 1px) calc(100%/var(--hrs)))}
 .legend{display:flex;gap:16px;flex-wrap:wrap;align-items:center;margin-top:8px;color:var(--dim);text-shadow:none}
 .legend i{display:inline-block;width:1.4em;height:.85em;vertical-align:-2px;margin-right:6px}
 
@@ -90,6 +93,22 @@ td .hb{display:inline-block;height:.55em;background:var(--fill);vertical-align:m
 .hl{display:grid;grid-template-columns:repeat(24,1fr);gap:3px;text-align:center;margin-top:3px}
 .hl span{color:var(--dim);text-shadow:none;font-size:.9em;overflow:hidden}
 .hl.p span{color:#B98A3A}
+.hc i{cursor:pointer}
+a.dim{cursor:pointer;text-decoration:none}
+a.dim:hover{color:var(--bright)}
+.dnote{margin:0 0 6px}
+.card{border:1px solid var(--rule);padding:10px 12px 10px;margin-top:12px}
+.card .ch{display:flex;gap:12px;align-items:baseline;flex-wrap:wrap}
+.card .ch .n2{font-size:1.6em;line-height:1}
+.card .stats{display:grid;grid-template-columns:repeat(4,1fr);gap:0 10px;margin-top:8px;border-top:1px solid var(--faint);padding-top:6px}
+.card .st b{display:block;font-size:1.3em;line-height:1.1}
+.card .st b small{font-size:.6em;color:var(--amber)}
+.card .st span{display:block;color:var(--dim);text-shadow:none}
+.card .tags{display:flex;flex-wrap:wrap;gap:6px;margin-top:8px}
+.card .tag{border:1px solid var(--faint);padding:0 8px;max-width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.card .tag small{color:var(--dim);margin-left:6px;text-shadow:none}
+.card .note{margin-top:8px;border-top:1px solid var(--faint);padding-top:6px}
+@media (max-width:900px){.card .stats{grid-template-columns:1fr 1fr}}
 
 footer{margin-top:24px}
 #tip{position:fixed;pointer-events:none;z-index:9;background:var(--glass);color:var(--amber);border:1px solid var(--rule);padding:5px 10px 6px;white-space:pre;opacity:0;transition:opacity .08s;max-width:440px;text-shadow:none;font:inherit;line-height:1.2;box-shadow:0 6px 24px rgba(0,0,0,.5)}
@@ -239,23 +258,78 @@ const tipFor = c=> c.n ? `${hhmm(new Date(c.a))}  ${c.n} agent${c.n>1?"s":""} wo
   for (const r of prep){
     const body=cells(r).map(c=>{ const cls=c.n>=3?"c3":c.n===2?"c2":c.n===1?"c1":c.idle?"ci":""; const tip=tipFor(c);
       return `<i class="${cls}"${tip?` data-t="${esc(tip)}"`:""}></i>`; }).join("");
-    rows+=`<div class="lab">${wds(r.day.key)} ${fmtD(r.day.key)}</div><div class="row" style="--n:${n};--hrs:${hrs}">${body}</div><div class="tot">${r.day===best?`<b>${r.day.work_h.toFixed(1)} *</b>`:r.day.work_h.toFixed(1)}</div>`;
+    rows+=`<div class="lab" data-day="${r.day.key}">${wds(r.day.key)} ${fmtD(r.day.key)}</div><div class="row" data-day="${r.day.key}" style="--n:${n};--hrs:${hrs}">${body}</div><div class="tot">${r.day===best?`<b>${r.day.work_h.toFixed(1)} *</b>`:r.day.work_h.toFixed(1)}</div>`;
   }
   $("#week").innerHTML = `<h3><span class="rv"> THE WEEK </span><span class="sub">day by day, agent-hours on the right</span></h3>
     <div class="g">${rows}</div>
-    <div class="legend"><span>one cell = ${STEP} min</span><span><i style="background:repeating-conic-gradient(#D9962A 0 25%,transparent 0 50%) 0 0/4px 4px"></i>one agent</span><span><i style="background:var(--fill)"></i>two</span><span><i style="background:var(--bright)"></i>three or more</span><span><i style="background:radial-gradient(circle,#A87A2A 1.5px,transparent 2px)"></i>you at the desk, fleet idle</span><span>* best day</span><span>hover a cell</span></div>`; }
+    <div class="legend"><span>one cell = ${STEP} min</span><span><i style="background:repeating-conic-gradient(#D9962A 0 25%,transparent 0 50%) 0 0/4px 4px"></i>one agent</span><span><i style="background:var(--fill)"></i>two</span><span><i style="background:var(--bright)"></i>three or more</span><span><i style="background:radial-gradient(circle,#A87A2A 1.5px,transparent 2px)"></i>you at the desk, fleet idle</span><span>* best day</span><span>hover a cell, click a day</span></div>`; }
 
-/* hours -------------------------------------------------------------------- */
-const HOURS = Array.from({length:24},()=>({sec:0,prompts:0}));
-for (const r of prep){ for (const [a,z] of r.work){ let t=a; while (t<z){ const d0=new Date(t), hr=d0.getHours();
-    const nxt=Math.min(z,+new Date(d0.getFullYear(),d0.getMonth(),d0.getDate(),hr+1)); HOURS[hr].sec+=(nxt-t)/1e3; t=nxt; } }
-  for (const p of r.day.prompts) HOURS[new Date(p).getHours()].prompts++; }
-{ const mxh=Math.max(...HOURS.map(x=>x.sec),1), pk=HOURS.findIndex(x=>x.sec===mxh);
-  $("#hours").innerHTML = `<h3><span class="rv"> HOURS </span><span class="sub">all days folded</span></h3>
-    <div class="hc">${HOURS.map((x,hr)=>`<i class="${x.sec?(hr===pk?"pk":""):"z"}" style="height:${Math.max(x.sec?3:0,x.sec/mxh*100)}%" data-t="${String(hr).padStart(2,"0")}:00  ${x.sec?hm(x.sec):"quiet"} agent work, ${x.prompts} prompts"></i>`).join("")}</div>
-    <div class="hl">${HOURS.map((x,hr)=>`<span>${hr%3===0?String(hr).padStart(2,"0"):""}</span>`).join("")}</div>
-    <div class="hl p">${HOURS.map(x=>`<span>${x.prompts||""}</span>`).join("")}</div>
-    <div class="cap wr">agent work by hour of day; the tallest bar is ${hm(mxh)} at ${String(pk).padStart(2,"0")}:00. The small row is your prompts in that hour.</div>`; }
+/* hours, one day or the whole window folded --------------------------------- */
+function hoursFor(dayKey){
+  const H = Array.from({length:24},()=>({sec:0, prompts:0, proj:{}, sess:{}, days:new Set(), peak:0, peakAt:null}));
+  for (const day of days){
+    if (dayKey && day.key!==dayKey) continue;
+    const spans=[];
+    for (const l of day.lanes) for (const b of l.bars) if (b.k==="work"){
+      let a=+new Date(b.a), z=+new Date(b.b); spans.push([a,z]);
+      while (a<z){ const d0=new Date(a), hr=d0.getHours();
+        const nxt=Math.min(z, +new Date(d0.getFullYear(),d0.getMonth(),d0.getDate(),hr+1));
+        const x=H[hr]; x.sec+=(nxt-a)/1e3; x.proj[l.project]=(x.proj[l.project]||0)+(nxt-a)/1e3;
+        const nm = l.title ? `${l.project}: ${l.title}` : l.project;
+        x.sess[nm]=(x.sess[nm]||0)+(nxt-a)/1e3;
+        if ((nxt-a)>3e5) x.days.add(day.key);
+        a=nxt; }
+    }
+    for (const p of day.prompts) H[new Date(p).getHours()].prompts++;
+    const pts=[]; for (const [a,z] of spans){ pts.push([a,1]); pts.push([z,-1]); }
+    pts.sort((x,y)=>x[0]-y[0]||x[1]-y[1]);
+    let cur=0;
+    for (const [t,d] of pts){ cur+=d; const x=H[new Date(t).getHours()]; if (cur>x.peak){ x.peak=cur; x.peakAt=t; } }
+  }
+  return H;
+}
+let curDay=null, HOURS, mxh, busiest, sel;
+function recompute(){ HOURS=hoursFor(curDay); mxh=Math.max(...HOURS.map(x=>x.sec),1); busiest=HOURS.findIndex(x=>x.sec===mxh); sel=busiest; }
+$("#hours").innerHTML = `<h3><span class="rv"> HOURS </span><span class="sub" id="hsub"></span></h3>
+  <div class="wr dnote" id="dnote" hidden></div>
+  <div class="hc" id="hbars"></div>
+  <div class="hl">${Array.from({length:24},(_,hr)=>`<span>${hr%3===0?String(hr).padStart(2,"0"):""}</span>`).join("")}</div>
+  <div class="hl p" id="hprom"></div>
+  <div class="cap wr">agent work by hour of day; the small row is your prompts in that hour. Hover a bar for the hour, click a day on the week to fold that day alone.</div>
+  <div class="card" id="card"></div>`;
+function drawHours(){
+  const all=!curDay;
+  $("#hsub").innerHTML = all ? `all ${days.length} days folded` : `${wd(curDay)} ${fmtD(curDay)}  <a class="dim" id="allDays">[fold all days]</a>`;
+  $("#hbars").innerHTML = HOURS.map((x,hr)=>`<i class="${x.sec?(hr===sel?"pk":""):"z"}" data-hr="${hr}" style="height:${Math.max(x.sec?3:0,x.sec/mxh*100)}%"></i>`).join("");
+  $("#hprom").innerHTML = HOURS.map(x=>`<span>${x.prompts||""}</span>`).join("");
+  const dn = !all && N.days?.[curDay]; $("#dnote").hidden = !dn; if (dn) $("#dnote").textContent = dn;
+  document.querySelectorAll(".g [data-day]").forEach(el=>el.classList.toggle("sel", el.dataset.day===curDay));
+}
+function showCard(hr){
+  const H=HOURS[hr], all=!curDay, hh=n=>String(n%24).padStart(2,"0")+":00";
+  const top = Object.entries(all ? H.proj : H.sess).sort((a,b)=>b[1]-a[1]).slice(0, all ? 5 : 5);
+  const when = H.peakAt ? (all ? `${wds(new Date(H.peakAt).toISOString().slice(0,10))} ${fmtD(new Date(H.peakAt).toISOString().slice(0,10))}, ` : "") + hhmm(new Date(H.peakAt)) : "";
+  const note = all ? N.hours?.[hr] : null;
+  $("#card").innerHTML = `<div class="ch"><b class="n2">${hh(hr)}</b><span class="dim">to ${hh(hr+1)}, ${all?`all ${days.length} days`:wd(curDay)+" "+fmtD(curDay)}</span>${hr===busiest?`<span class="rv"> busiest hour </span>`:""}</div>
+    ${H.sec<60 ? `<div class="dim" style="margin-top:6px">Nothing ran in this hour${all?" on any day":""}. The fleet slept; presumably, so did you.</div>` : `
+    <div class="stats">
+      <div class="st"><b>${hm(H.sec)}</b><span>agent work${all?`, ${H.days.size} day${H.days.size>1?"s":""}`:""}</span></div>
+      <div class="st"><b>${H.peak} <small>at once</small></b><span>${when?`peak at ${when}`:"deepest parallelism"}</span></div>
+      <div class="st"><b>${H.prompts}</b><span>your prompts</span></div>
+      <div class="st"><b>${Object.keys(H.proj).length}</b><span>project${Object.keys(H.proj).length>1?"s":""} in the hour</span></div>
+    </div>
+    <div class="tags">${top.map(([p,s])=>`<span class="tag" title="${esc(p)}">${esc(p)}<small>${hm(s)}</small></span>`).join("")}</div>
+    ${note?`<div class="note wr">${esc(note)}</div>`:""}`}`;
+}
+function setDay(k){ curDay = k||null; recompute(); drawHours(); showCard(sel); }
+addEventListener("click", e=>{
+  if (e.target.closest?.("#allDays")) { setDay(null); return; }
+  const d=e.target.closest?.(".g [data-day]"); if (!d) return;
+  setDay(d.dataset.day===curDay ? null : d.dataset.day);
+});
+addEventListener("pointerover", e=>{ const w=e.target.closest?.("#hbars i"); if(!w) return;
+  if (+w.dataset.hr===sel) return; sel=+w.dataset.hr; drawHours(); showCard(sel); });
+setDay(null);
 
 /* one tooltip for everything that carries data-t --------------------------- */
 { const tip=$("#tip"); addEventListener("mousemove",e=>{ const b=e.target.closest?.("[data-t]"); if(!b){tip.style.opacity=0;return;}
