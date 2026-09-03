@@ -68,9 +68,11 @@ h3 .sub{color:var(--dim);text-shadow:none}
 
 /* tables */
 .duo{display:grid;grid-template-columns:1fr 1fr;gap:0 30px}
+.duo table,.duo .cap{font-size:.9em}
+@media (max-width:1180px){.duo{grid-template-columns:1fr}}
 table{border-collapse:collapse;width:100%;font:inherit}
-th{text-align:left;color:var(--dim);font-weight:400;padding:0 8px 2px 0;border-bottom:1px solid var(--rule);text-shadow:none;vertical-align:bottom}
-td{padding:3px 8px 3px 0;border-bottom:1px solid var(--hair);vertical-align:baseline;white-space:nowrap}
+th{text-align:left;color:var(--dim);font-weight:400;padding:0 6px 2px 0;border-bottom:1px solid var(--rule);text-shadow:none;vertical-align:bottom}
+td{padding:3px 6px 3px 0;border-bottom:1px solid var(--hair);vertical-align:baseline;white-space:nowrap}
 tr:last-child td{border-bottom:none}
 td.r,th.r{text-align:right;padding-right:0}
 td .hb{display:inline-block;height:.55em;background:var(--fill);vertical-align:middle;margin-right:6px;box-shadow:0 0 6px rgba(237,165,46,.45)}
@@ -366,11 +368,11 @@ setDay(null);
   $("#tables").innerHTML = `<div class="duo">
     <div><h3><span class="rv"> BY TASK KIND </span></h3>
       <table><tr><th>kind</th><th class="r">sessions</th><th class="r">agent-h</th><th class="r">turnaround</th><th class="r">starved</th></tr>
-      ${ks.map(x=>`<tr><td>${x.k}</td><td class="r dim">${x.n}</td><td class="r"><span class="hb" style="width:${Math.max(2,x.work_h/mk*60)}px"></span>${x.work_h.toFixed(1)}</td><td class="r">${x.it===slow?`<b>${hm(x.it)}</b>`:hm(x.it)}</td><td class="r">${x.starved_h.toFixed(1)} h</td></tr>`).join("")}</table>
+      ${ks.map(x=>`<tr><td>${x.k}</td><td class="r dim">${x.n}</td><td class="r"><span class="hb" style="width:${Math.max(2,x.work_h/mk*44)}px"></span>${x.work_h.toFixed(1)}</td><td class="r">${x.it===slow?`<b>${hm(x.it)}</b>`:hm(x.it)}</td><td class="r">${x.starved_h.toFixed(1)} h</td></tr>`).join("")}</table>
       <div class="cap wr">turnaround: median time from the agent stopping to your next prompt; bright is the slowest. Kinds come from what the agent did, so trust the direction, not the decimals.</div></div>
     <div><h3><span class="rv"> BY PROJECT </span></h3>
       <table><tr><th>project</th><th class="r">sessions</th><th class="r">agent-h</th><th class="r">efficiency</th><th class="r">starved</th></tr>
-      ${P.map(p=>`<tr><td>${esc(p.project)}</td><td class="r dim">${p.sessions}</td><td class="r"><span class="hb" style="width:${Math.max(2,p.work_h/mp*60)}px"></span>${p.work_h.toFixed(1)}</td><td class="r">${p.efficiency===hi?`<b>${pct(p.efficiency)}</b>`:p.efficiency===lo?`<span class="rv">${pct(p.efficiency)}</span>`:pct(p.efficiency)}</td><td class="r">${(p.starved_h||0).toFixed(1)} h</td></tr>`).join("")}</table>
+      ${P.map(p=>`<tr><td>${esc(p.project)}</td><td class="r dim">${p.sessions}</td><td class="r"><span class="hb" style="width:${Math.max(2,p.work_h/mp*44)}px"></span>${p.work_h.toFixed(1)}</td><td class="r">${p.efficiency===hi?`<b>${pct(p.efficiency)}</b>`:p.efficiency===lo?`<span class="rv">${pct(p.efficiency)}</span>`:pct(p.efficiency)}</td><td class="r">${(p.starved_h||0).toFixed(1)} h</td></tr>`).join("")}</table>
       <div class="cap wr">efficiency: share of the attention a project consumed that was an agent actually working; bright is the best, reverse the worst.</div></div>
   </div>`; }
 </script>
