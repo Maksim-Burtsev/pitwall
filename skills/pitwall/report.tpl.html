@@ -92,6 +92,8 @@ td .hb{display:inline-block;height:.55em;background:var(--fill);vertical-align:m
 .hl.p span{color:#B98A3A}
 
 footer{margin-top:24px}
+#tip{position:fixed;pointer-events:none;z-index:9;background:var(--glass);color:var(--amber);border:1px solid var(--rule);padding:5px 10px 6px;white-space:pre;opacity:0;transition:opacity .08s;max-width:440px;text-shadow:none;font:inherit;line-height:1.2;box-shadow:0 6px 24px rgba(0,0,0,.5)}
+#tip b{text-shadow:none}
 @media (max-width:900px){.two,.duo{grid-template-columns:1fr}}
 @media print{body{background:#fff;color:#000}.crt{box-shadow:none;background:#fff;text-shadow:none}}
 </style>
@@ -113,6 +115,7 @@ footer{margin-top:24px}
   </div>
   <footer class="bar rv" id="foot"></footer>
 </div>
+<div id="tip"></div>
 
 <script>
 const D = /*__DATA__*/null;
@@ -235,7 +238,7 @@ const tipFor = c=> c.n ? `${hhmm(new Date(c.a))}  ${c.n} agent${c.n>1?"s":""} wo
   let rows=`<div></div><div class="hd">${hd}</div><div></div>`;
   for (const r of prep){
     const body=cells(r).map(c=>{ const cls=c.n>=3?"c3":c.n===2?"c2":c.n===1?"c1":c.idle?"ci":""; const tip=tipFor(c);
-      return `<i class="${cls}"${tip?` title="${esc(tip)}"`:""}></i>`; }).join("");
+      return `<i class="${cls}"${tip?` data-t="${esc(tip)}"`:""}></i>`; }).join("");
     rows+=`<div class="lab">${wds(r.day.key)} ${fmtD(r.day.key)}</div><div class="row" style="--n:${n};--hrs:${hrs}">${body}</div><div class="tot">${r.day===best?`<b>${r.day.work_h.toFixed(1)} *</b>`:r.day.work_h.toFixed(1)}</div>`;
   }
   $("#week").innerHTML = `<h3><span class="rv"> THE WEEK </span><span class="sub">day by day, agent-hours on the right</span></h3>
@@ -249,10 +252,15 @@ for (const r of prep){ for (const [a,z] of r.work){ let t=a; while (t<z){ const 
   for (const p of r.day.prompts) HOURS[new Date(p).getHours()].prompts++; }
 { const mxh=Math.max(...HOURS.map(x=>x.sec),1), pk=HOURS.findIndex(x=>x.sec===mxh);
   $("#hours").innerHTML = `<h3><span class="rv"> HOURS </span><span class="sub">all days folded</span></h3>
-    <div class="hc">${HOURS.map((x,hr)=>`<i class="${x.sec?(hr===pk?"pk":""):"z"}" style="height:${Math.max(x.sec?3:0,x.sec/mxh*100)}%" title="${String(hr).padStart(2,"0")}:00  ${x.sec?hm(x.sec):"quiet"} agent work, ${x.prompts} prompts"></i>`).join("")}</div>
+    <div class="hc">${HOURS.map((x,hr)=>`<i class="${x.sec?(hr===pk?"pk":""):"z"}" style="height:${Math.max(x.sec?3:0,x.sec/mxh*100)}%" data-t="${String(hr).padStart(2,"0")}:00  ${x.sec?hm(x.sec):"quiet"} agent work, ${x.prompts} prompts"></i>`).join("")}</div>
     <div class="hl">${HOURS.map((x,hr)=>`<span>${hr%3===0?String(hr).padStart(2,"0"):""}</span>`).join("")}</div>
     <div class="hl p">${HOURS.map(x=>`<span>${x.prompts||""}</span>`).join("")}</div>
     <div class="cap wr">agent work by hour of day; the tallest bar is ${hm(mxh)} at ${String(pk).padStart(2,"0")}:00. The small row is your prompts in that hour.</div>`; }
+
+/* one tooltip for everything that carries data-t --------------------------- */
+{ const tip=$("#tip"); addEventListener("mousemove",e=>{ const b=e.target.closest?.("[data-t]"); if(!b){tip.style.opacity=0;return;}
+  tip.innerHTML=b.dataset.t.replace(/^(\S+)/,"<b>$1</b>"); tip.style.opacity=1; const r=tip.getBoundingClientRect();
+  tip.style.left=Math.min(e.clientX+14,innerWidth-r.width-8)+"px"; tip.style.top=Math.max(e.clientY-r.height-12,8)+"px"; }); }
 
 /* tables ------------------------------------------------------------------- */
 { const ORDER=["research","build","fix","ops","talk"];
