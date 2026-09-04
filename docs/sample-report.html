@@ -74,7 +74,7 @@ table{border-collapse:collapse;width:100%;font:inherit}
 th{text-align:left;color:var(--dim);font-weight:400;padding:0 6px 2px 0;border-bottom:1px solid var(--rule);text-shadow:none;vertical-align:bottom}
 td{padding:3px 6px 3px 0;border-bottom:1px solid var(--hair);vertical-align:baseline;white-space:nowrap}
 tr:last-child td{border-bottom:none}
-td.r,th.r{text-align:right;padding-right:0}
+td.r,th.r{text-align:right;padding-right:0;padding-left:12px}
 td .hb{display:inline-block;height:.55em;background:var(--fill);vertical-align:middle;margin-right:6px;box-shadow:0 0 6px rgba(237,165,46,.45)}
 .cap{color:var(--dim);text-shadow:none;margin-top:6px}
 
@@ -110,6 +110,26 @@ td .hb{display:inline-block;height:.55em;background:var(--fill);vertical-align:m
 a.dim{cursor:pointer;text-decoration:none}
 a.dim:hover{color:var(--bright)}
 .dnote{margin:0 0 6px}
+/* the day picker: a details element drawn as a terminal menu */
+.dd{position:relative;display:inline-block}
+.dd summary{list-style:none;cursor:pointer;border:1px solid var(--rule);padding:0 8px;white-space:nowrap;color:var(--amber)}
+.dd summary::-webkit-details-marker{display:none}
+.dd summary::after{content:" \25BE";color:var(--dim)}
+.dd summary:hover,.dd[open] summary{border-color:var(--bright);color:var(--bright)}
+.dd menu{position:absolute;left:0;top:100%;z-index:5;margin:2px 0 0;padding:2px 0;list-style:none;min-width:100%;background:var(--screen);border:1px solid var(--rule);box-shadow:0 8px 24px rgba(0,0,0,.6)}
+.dd li{padding:0 8px;white-space:nowrap;cursor:pointer}
+.dd li:hover,.dd li.sel{background:var(--fill);color:var(--ink);text-shadow:none}
+.dd li.sel::after{content:" *"}
+h3 .dd{font-size:1em}
+/* by task kind: delivered, then the tail that sat waiting */
+.hs{display:grid;grid-template-columns:auto 1fr auto;gap:6px 12px;align-items:center;font-size:.9em}
+.hs .hd{color:var(--dim);text-shadow:none;border-bottom:1px solid var(--rule);padding-bottom:2px;white-space:nowrap}
+.hs .bb{display:flex;height:1.05em;gap:2px}
+.hs .bb i{display:block;height:100%}
+.hs .bb .w{background:var(--fill);box-shadow:0 0 6px rgba(237,165,46,.45)}
+.hs .bb .s{background:radial-gradient(circle,#A87A2A 1.5px,transparent 2px) 0 0/6px 6px}
+.hs .n{white-space:nowrap;text-align:right}
+.hs .n small{color:var(--dim);text-shadow:none;font-size:1em}
 .card{border:1px solid var(--rule);padding:10px 12px 10px;margin-top:12px}
 .card .ch{display:flex;gap:12px;align-items:baseline;flex-wrap:wrap}
 .card .ch .n2{font-size:1.6em;line-height:1}
@@ -313,16 +333,17 @@ function hoursFor(dayKey){
 }
 let curDay=null, HOURS, mxh, busiest, sel;
 function recompute(){ HOURS=hoursFor(curDay); mxh=Math.max(...HOURS.map(x=>x.sec),1); busiest=HOURS.findIndex(x=>x.sec===mxh); sel=busiest; }
-$("#hours").innerHTML = `<h3><span class="rv"> HOURS </span><span class="sub" id="hsub"></span></h3>
+$("#hours").innerHTML = `<h3><span class="rv"> HOURS </span><details class="dd" id="dd"><summary id="hsub"></summary><menu><li data-day="">all ${days.length} days folded</li>${days.map(d=>`<li data-day="${d.key}">${wd(d.key)} ${fmtD(d.key)}${d===best?", best day":""}</li>`).join("")}</menu></details><span class="sub">or click a day on the week</span></h3>
   <div class="wr dnote" id="dnote" hidden></div>
   <div class="hc" id="hbars"></div>
   <div class="hl">${Array.from({length:24},(_,hr)=>`<span>${hr%3===0?String(hr).padStart(2,"0"):""}</span>`).join("")}</div>
   <div class="hl p" id="hprom"></div>
-  <div class="cap wr">agent work by hour of day; the small row is your prompts in that hour. Hover a bar for the hour, click a day on the week to fold that day alone.</div>
+  <div class="cap wr">agent work by hour of day; the small row is your prompts in that hour. Hover a bar for the hour, pick a day above, or click one on the week, to fold that day alone.</div>
   <div class="card" id="card"></div>`;
 function drawHours(){
   const all=!curDay;
-  $("#hsub").innerHTML = all ? `all ${days.length} days folded` : `${wd(curDay)} ${fmtD(curDay)}  <a class="dim" id="allDays">[fold all days]</a>`;
+  $("#hsub").textContent = all ? `all ${days.length} days folded` : `${wd(curDay)} ${fmtD(curDay)}`;
+  document.querySelectorAll("#dd li").forEach(el=>el.classList.toggle("sel", (el.dataset.day||null)===curDay));
   $("#hbars").innerHTML = HOURS.map((x,hr)=>`<i class="${x.sec?(hr===sel?"pk":""):"z"}" data-hr="${hr}" style="height:${Math.max(x.sec?3:0,x.sec/mxh*100)}%"></i>`).join("");
   $("#hprom").innerHTML = HOURS.map(x=>`<span>${x.prompts||""}</span>`).join("");
   const dn = !all && N.days?.[curDay]; $("#dnote").hidden = !dn; if (dn) $("#dnote").textContent = dn;
@@ -346,7 +367,8 @@ function showCard(hr){
 }
 function setDay(k){ curDay = k||null; recompute(); drawHours(); showCard(sel); }
 addEventListener("click", e=>{
-  if (e.target.closest?.("#allDays")) { setDay(null); return; }
+  const li=e.target.closest?.("#dd li"); if (li) { $("#dd").open=false; setDay(li.dataset.day); return; }
+  if (!e.target.closest?.("#dd")) $("#dd").open=false;
   const d=e.target.closest?.(".g [data-day]"); if (!d) return;
   setDay(d.dataset.day===curDay ? null : d.dataset.day);
 });
@@ -362,14 +384,14 @@ setDay(null);
 /* tables ------------------------------------------------------------------- */
 { const ORDER=["research","build","fix","ops","talk"];
   const ks = ORDER.filter(k=>D.kinds[k]&&D.kinds[k].turns>=3).map(k=>({k,...D.kinds[k]}));
-  const mk = Math.max(...ks.map(x=>x.work_h),1), slow = Math.max(...ks.map(x=>x.it));
+  const mk = Math.max(...ks.map(x=>x.work_h+x.starved_h),1); ks.sort((a,b)=>b.work_h-a.work_h);
   const P = D.projects.filter(p=>p.work_h>=.5).sort((a,b)=>b.work_h-a.work_h).slice(0,7);
   const mp = Math.max(...P.map(p=>p.work_h),1), lo = Math.min(...P.map(p=>p.efficiency)), hi = Math.max(...P.map(p=>p.efficiency));
   $("#tables").innerHTML = `<div class="duo">
     <div><h3><span class="rv"> BY TASK KIND </span></h3>
-      <table><tr><th>kind</th><th class="r">sessions</th><th class="r">agent-h</th><th class="r">turnaround</th><th class="r">starved</th></tr>
-      ${ks.map(x=>`<tr><td>${x.k}</td><td class="r dim">${x.n}</td><td class="r"><span class="hb" style="width:${Math.max(2,x.work_h/mk*44)}px"></span>${x.work_h.toFixed(1)}</td><td class="r">${x.it===slow?`<b>${hm(x.it)}</b>`:hm(x.it)}</td><td class="r">${x.starved_h.toFixed(1)} h</td></tr>`).join("")}</table>
-      <div class="cap wr">turnaround: median time from the agent stopping to your next prompt; bright is the slowest. Kinds come from what the agent did, so trust the direction, not the decimals.</div></div>
+      <div class="hs"><div class="hd">kind</div><div class="hd">agent-hours, then hours sat waiting</div><div class="hd" style="text-align:right">sessions</div>
+      ${ks.map(x=>`<div>${x.k}</div><div class="bb"><i class="w" style="width:${x.work_h/mk*100}%" data-t="${x.k}: ${x.work_h.toFixed(1)} agent-hours delivered in ${x.n} sessions; the agent runs ${hm(x.nt)} before it needs you, you come back in ${hm(x.it)}"></i><i class="s" style="width:${x.starved_h/mk*100}%" data-t="${x.k}: ${x.starved_h.toFixed(1)} agent-hours sat finished, waiting while you were in another session"></i></div><div class="n"><b>${x.work_h.toFixed(1)} h</b> <small>+${x.starved_h.toFixed(1)} waited</small> <small style="margin-left:8px">${x.n}</small></div>`).join("")}</div>
+      <div class="cap wr">the dotted tail is work of that kind that sat finished while you were elsewhere. Hover a bar for the run and reply times. Kinds come from what the agent did, so trust the direction, not the decimals.</div></div>
     <div><h3><span class="rv"> BY PROJECT </span></h3>
       <table><tr><th>project</th><th class="r">sessions</th><th class="r">agent-h</th><th class="r">efficiency</th><th class="r">starved</th></tr>
       ${P.map(p=>`<tr><td>${esc(p.project)}</td><td class="r dim">${p.sessions}</td><td class="r"><span class="hb" style="width:${Math.max(2,p.work_h/mp*44)}px"></span>${p.work_h.toFixed(1)}</td><td class="r">${p.efficiency===hi?`<b>${pct(p.efficiency)}</b>`:p.efficiency===lo?`<span class="rv">${pct(p.efficiency)}</span>`:pct(p.efficiency)}</td><td class="r">${(p.starved_h||0).toFixed(1)} h</td></tr>`).join("")}</table>
