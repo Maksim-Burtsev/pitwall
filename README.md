@@ -1,4 +1,4 @@
-# pitwall
+<p align="center"><img src="assets/banner.png" alt="Pitwall: an amber terminal with a week of agent sessions and the line: your agents are waiting for you" width="100%"></p>
 
 <p align="center"><strong>Your AI coding agents spend most of their life waiting for you.<br>Pitwall measures how much, why, and what to change.</strong></p>
 
