@@ -46,9 +46,10 @@ out of the notes.
 Three places in the report take prose only a model can write. Put them in one JSON file:
 
 ```json
-{"week":  "one sentence",
- "days":  {"2026-08-29": "one sentence"},
- "hours": {"23": "one sentence", "17": "one sentence"}}
+{"week":   "one sentence",
+ "days":   {"2026-08-29": "one sentence"},
+ "hours":  {"23": "one sentence", "17": "one sentence"},
+ "titles": {"<session id>": "a short English title"}}
 ```
 
 - `week`: the verdict at the top of the page, in one sentence. Not the numbers (the tiles under
@@ -63,6 +64,12 @@ Three places in the report take prose only a model can write. Put them in one JS
   hour's bar. Build it from `days[].lanes[]`: each lane has `project`, `title` (the
   session's own name) and `bars` with timestamps, so you know which sessions ran in that hour on
   which days. Say what was being worked on and how the hour felt.
+
+- `titles`: one short English title per session in `sessions[]`, keyed by `id`, under eight
+  words, naming the task the way the user would ("Port jpegli to Python", "Mail triage").
+  The report's font has Latin glyphs only; a title in any other script falls back to a
+  different face and breaks the line. Write every session, including the ones already in
+  English, so the wording is consistent.
 
 Rules: under 30 words each, concrete, name projects and tasks the way the user names them, no
 numbers the chart already shows, no em-dashes. Plain sentences beat clever ones.
