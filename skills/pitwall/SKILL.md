@@ -27,6 +27,10 @@ beyond which a single report stops being informative. `--today` includes the cur
 Keep scratch files (`pitwall.json`, `notes.json`) out of the user's repositories: use your
 harness's scratch directory or `~/.claude/pitwall/`.
 
+The report is one amber terminal screen: the verdict, leaks and strengths on the left, the week,
+the hours, the three calls and the tables on the right. From the second run the tiles carry the
+change against the previous run, from `~/.claude/pitwall/history.jsonl`.
+
 **Deliver the report, do not describe it.** If your harness can publish or preview an HTML file
 (an artifact, a preview pane, a hosted page), publish the rendered file unchanged and give the
 link. Otherwise open it for them (`open` on macOS, `xdg-open` on Linux) and print the path. Do
@@ -42,23 +46,30 @@ out of the notes.
 Three places in the report take prose only a model can write. Put them in one JSON file:
 
 ```json
-{"week":  "one sentence",
- "days":  {"2026-08-29": "one sentence"},
- "hours": {"23": "one sentence", "17": "one sentence"}}
+{"week":   "one sentence",
+ "days":   {"2026-08-29": "one sentence"},
+ "hours":  {"23": "one sentence", "17": "one sentence"},
+ "titles": {"<session id>": "a short English title"}}
 ```
 
 - `week`: the verdict at the top of the page, in one sentence. Not the numbers (the tiles under
   it show those) but the shape of the week: what kind of work ran unattended and what kind kept
   the user pinned. Example: "A week of two fleets: a daytime one of errands and reviews that
   never runs unattended, and a night one, the data pipeline and the Rust bindings, that does."
-- `days`: one line per day, printed under that day's row in the calendar. What the day was about
-  and, if the row shows stalls, what caused them ("one long research block after lunch, three
+- `days`: one line per day, shown above the hour chart when the reader clicks that day on the
+  week. What the day was about and, if the row shows stalls, what caused them ("one long research block after lunch, three
   agents fed in turn, two short stalls behind the migration session").
 - `hours`: one line per hour of the day (keys `"0"` to `"23"`) that has agent work anywhere in
-  the window. It appears in the hour card when the reader folds all days onto the clock and
-  hovers that hour. Build it from `days[].lanes[]`: each lane has `project`, `title` (the
+  the window. It appears in the hour card when all days are folded and the reader hovers that
+  hour's bar. Build it from `days[].lanes[]`: each lane has `project`, `title` (the
   session's own name) and `bars` with timestamps, so you know which sessions ran in that hour on
   which days. Say what was being worked on and how the hour felt.
+
+- `titles`: one short English title per session in `sessions[]`, keyed by `id`, under eight
+  words, naming the task the way the user would ("Port jpegli to Python", "Mail triage").
+  The report's font has Latin glyphs only; a title in any other script falls back to a
+  different face and breaks the line. Write every session, including the ones already in
+  English, so the wording is consistent.
 
 Rules: under 30 words each, concrete, name projects and tasks the way the user names them, no
 numbers the chart already shows, no em-dashes. Plain sentences beat clever ones.

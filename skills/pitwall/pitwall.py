@@ -628,7 +628,7 @@ def main():
     p.add_argument("--out", default=os.path.expanduser("~/.claude/pitwall/report.html"))
     p.add_argument("--root", default=os.path.expanduser("~/.claude/projects"))
     p.add_argument("--json", action="store_true", help="dump metrics as JSON to stdout instead")
-    p.add_argument("--notes", help='JSON file of model-written summaries: {"hours": {"23": ...}, "days": {"2026-08-25": ...}}')
+    p.add_argument("--notes", help='JSON file of model-written summaries: {"week": ..., "days": {...}, "hours": {...}, "titles": {session id: ...}}')
     p.add_argument("--no-titles", action="store_true", help="drop session titles (your own prompt text) from the report")
     a = p.parse_args()
 
@@ -642,6 +642,12 @@ def main():
     payload = to_payload(analyze(sessions, since), a.days)
     if a.notes:
         payload["notes"] = json.load(open(a.notes))
+        titles = payload["notes"].get("titles") or {}   # model-written English titles, keyed by session id
+        for s_ in payload["sessions"]:
+            s_["title"] = titles.get(s_["id"], s_["title"])
+        for d in payload["days"]:
+            for l in d["lanes"]:
+                l["title"] = titles.get(l["sid"], l["title"])
     if a.no_titles:
         for s_ in payload["sessions"]:
             s_["title"] = ""

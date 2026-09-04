@@ -96,8 +96,18 @@ def main():
         html = af.render(payload, open(os.path.join(os.path.dirname(af.__file__), "report.tpl.html")).read())
         assert "/*__DATA__*/null" not in html, "data placeholder was not substituted"
         assert '"fanout_potential"' in html
-        payload["notes"] = {"hours": {"12": "noon"}, "days": {}}
-        assert '"noon"' in af.render(payload, open(os.path.join(os.path.dirname(af.__file__), "report.tpl.html")).read())
+        tpl = open(os.path.join(os.path.dirname(af.__file__), "report.tpl.html")).read()
+        payload["notes"] = {"week": "a \"quoted\" week", "hours": {"12": "noon"}, "days": {}}
+        html = af.render(payload, tpl)
+        assert '"noon"' in html and 'a \\"quoted\\" week' in html, "notes must survive JSON embedding"
+        # the template reads the previous run from history; with and without one it must embed cleanly
+        payload["history"] = [{"until": "2026-01-01", "days_window": 7, "work": 1.0, "desk": 2.0, "hands": 1.0,
+                               "dead": 0.5, "days": 1, "lev": 0.5, "fo": 1.5}]
+        html = af.render(payload, tpl)
+        assert '"until": "2026-01-01"' in html
+        for anchor in ('id="verdict"', 'id="leaks"', 'id="keep"', 'id="week"', 'id="hours"', 'id="calls"', 'id="tables"'):
+            assert anchor in html, anchor
+        assert "</script>" in html and html.count("<script>") == 1
 
     print("ok")
 

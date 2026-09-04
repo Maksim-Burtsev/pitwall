@@ -9,7 +9,7 @@
   "plugins": [
     {
       "name": "pitwall",
-      "description": "One-page report from local session logs: agent-hours delivered and waited, dead air, your fan-out ceiling, the failure patterns that fire, three ranked changes, a day-by-day calendar and an hour-by-hour clock. /pitwall, optionally with a number of days.",
+      "description": "One amber terminal screen from local session logs: agent-hours delivered and waited, dead air, your fan-out ceiling, the failure patterns that fire, three ranked changes, a day-by-day week you can click into, hour by hour. /pitwall, optionally with a number of days.",
       "source": "./",
       "category": "productivity"
     }
