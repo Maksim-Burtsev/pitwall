@@ -2,7 +2,10 @@
 
 <p align="center"><strong>Your AI coding agents spend most of their life waiting for you.<br>Pitwall measures how much, why, and what to change.</strong></p>
 
+<p align="center"><em>One amber screen a week: the verdict, the patterns that fire on your numbers, the three changes that pay.</em><br><sub>Read from the session logs already on your disk. Nothing leaves the machine.</sub></p>
+
 <p align="center">
+  <a href="https://github.com/Maksim-Burtsev/pitwall/releases"><img src="https://img.shields.io/github/v/release/Maksim-Burtsev/pitwall?display_name=release&label=release&color=2ea44f" alt="Latest release"></a>
   <a href="LICENSE"><img src="https://img.shields.io/badge/license-MIT-blue" alt="MIT license"></a>
   <a href="#install"><img src="https://img.shields.io/badge/install-npx%20skills%20add-8A2BE2" alt="Install with npx skills add"></a>
   <img src="https://img.shields.io/badge/python-stdlib%20only-3776AB" alt="Python, standard library only">
