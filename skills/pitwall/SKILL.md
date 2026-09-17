@@ -162,11 +162,15 @@ The notes you wrote are part of the report; do not repeat them in the reply.
 
 Say these only if they matter to a conclusion:
 
-- An agent is "working" while its log events are at most 120 s apart; a slower tool call reads
-  as a pause.
-- Silences over 20 minutes are dropped, not counted as idle: the human was away.
+- An agent is "working" while its log events, or its subagents' events, are at most 120 s apart,
+  and while a background command it started has not reported back. A slow foreground tool call
+  still reads as a pause (the log cannot tell it from a permission prompt), and so does a monitor
+  (it can be waiting on the human).
+- Silences over 20 minutes are dropped, not counted as idle: the human was away. Desk hours
+  follow the same rule: only time within 20 minutes of a prompt, so an agent running on overnight
+  adds agent-hours, not desk hours or dead air.
 - `WTI` uses a reading and typing estimate (~1500 chars/min read, ~200 typed), so the split
   between reading-and-typing and lost-thread time is calibrated, not measured. Starvation, dead
   air and turnarounds are timestamp-exact.
-- Only sessions with at least one human prompt count. SDK and subagent runs had nobody
-  supervising them.
+- Only sessions with at least one human prompt count. SDK runs had nobody supervising them;
+  subagent runs count as the session that launched them.

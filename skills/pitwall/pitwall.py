@@ -14,6 +14,7 @@ Stdlib only. python3 pitwall.py --help
 import argparse
 import json
 import os
+import re
 import sys
 from collections import defaultdict
 from datetime import datetime, timedelta, timezone
@@ -108,12 +109,34 @@ def glob_jsonl(root):
                 yield os.path.join(d, f)
 
 
+BG_START = re.compile(r"running in background with ID: (\w+)")
+BG_DONE = re.compile(r"<task-id>(\w+)</task-id>.*?<status>", re.S)
+
+
+def subagent_events(session_dir):
+    """Timestamps from the session's subagent transcripts. Their words are not
+    counted: nobody reads a subagent's output, the parent does."""
+    sub = os.path.join(session_dir, "subagents")
+    out = []
+    for f in os.listdir(sub) if os.path.isdir(sub) else []:
+        if not f.endswith(".jsonl"):
+            continue
+        for line in open(os.path.join(sub, f), errors="ignore"):
+            try:
+                d = json.loads(line)
+                t = parse_ts(d["timestamp"])
+            except (ValueError, KeyError, TypeError, AttributeError):
+                continue
+            out.append((t, "assistant" if d.get("type") == "assistant" else "other", 0))
+    return out
+
+
 def load_sessions(root, since, until):
     """Sessions with no human prompt are SDK or subagent runs — nobody was
     supervising them, so they have no place in a supervision metric."""
     for path in sorted(glob_jsonl(root)):
         events, submits, title, cwd, branch, first, opening = [], [], None, None, None, None, ""
-        tools = defaultdict(int)
+        tools, launched, background = defaultdict(int), {}, []
         for line in open(path, errors="ignore"):
             try:
                 d = json.loads(line)
@@ -146,6 +169,16 @@ def load_sessions(root, since, until):
                     opening = as_text(msg.get("content"))[:600]
             else:
                 events.append((t, "other", 0))
+                content = msg.get("content")
+                if (d.get("origin") or {}).get("kind") == "task-notification":
+                    done = BG_DONE.search(as_text(content))
+                    if done and done.group(1) in launched:
+                        background.append((launched.pop(done.group(1)), t))
+                elif kind == "user" and isinstance(content, list):
+                    for b in content:
+                        started = isinstance(b, dict) and BG_START.search(as_text(b.get("content")))
+                        if started:
+                            launched[started.group(1)] = t
         if not submits or not events:
             continue
         events.sort()
@@ -153,6 +186,12 @@ def load_sessions(root, since, until):
         submits = [x for x in submits if x[0] < until]
         if not submits or not events or events[-1][0] < since:
             continue
+        # the agent is still working while its subagents run and until its background
+        # commands report back. A monitor is not: it can be waiting on anything, you included.
+        events += subagent_events(path[:-6])
+        for a, b in background:
+            events += [(a + timedelta(seconds=x), "other", 0) for x in range(BUSY_GAP, int(sec(a, b)), BUSY_GAP)]
+        events = sorted(e for e in events if e[0] < until)
         yield {"id": os.path.basename(path)[:-6], "project": os.path.basename(os.path.dirname(path)),
                "cwd": cwd or "", "branch": branch, "title": title or first,
                "events": events, "submits": sorted(submits),
@@ -254,17 +293,19 @@ def analyze(sessions, since, until=None):
     occ = concurrency(work_spans)
     wall = sum(occ.values()) or 1
 
-    blocks = merge_spans(work_spans, slack=AWAY_GAP)
+    # your desk: the working blocks, but only while you are around, within AWAY_GAP of a
+    # prompt. An agent that runs on through the night adds agent-hours, not desk hours.
+    away = timedelta(seconds=AWAY_GAP)
+    here = merge_spans([(t - away, t + away) for t, _ in all_submits])
+    blocks = [(max(a, c), min(b, d)) for a, b in merge_spans(work_spans, slack=AWAY_GAP)
+              for c, d in here if min(b, d) > max(a, c)]
     blocks = [b for b in blocks if sec(*b) > 60]
     elapsed = sum(sec(*b) for b in blocks)
 
-    # dead air: inside a working block, nothing is running at all
+    # dead air: at the desk, nothing is running at all
     dead = []
     for a, b in blocks:
-        inner = [r for r in live_runs if r[0] >= a and r[1] <= b]
-        edges = [a] + [t for r in inner for t in r] + [b]
-        for x, y in zip(edges[::2], edges[1::2]):
-            pass
+        inner = [(max(r0, a), min(r1, b)) for r0, r1 in live_runs if r1 > a and r0 < b]
         prev = a
         for r0, r1 in inner:
             if sec(prev, r0) >= DEAD_AIR:

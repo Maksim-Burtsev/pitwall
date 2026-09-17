@@ -53,6 +53,34 @@ def write(root, name, records):
             f.write(json.dumps(r) + "\n")
 
 
+def check_background(root):
+    """Subagents and background commands keep a run going; a monitor does not."""
+    os.makedirs(os.path.join(root, "-repo-demo", "p", "subagents"))
+    note = lambda sec, tid: {"type": "user", "timestamp": at(sec), "origin": {"kind": "task-notification"},
+                             "message": {"role": "user", "content": f"<task-notification>\n<task-id>{tid}</task-id>\n"
+                                                                    "<status>completed</status>\n</task-notification>"}}
+    result = lambda sec, text: {"type": "user", "timestamp": at(sec), "message": {"role": "user", "content": [
+        {"type": "tool_result", "tool_use_id": "t", "content": text}]}}
+    write(root, "p", [
+        human(0, "go"), bot(10, "launching"),
+        result(20, "Command running in background with ID: bx1. Output is being written to: x"),
+        note(920, "bx1"), bot(930, "built"),                  # 900 s of silence while the command ran
+        bot(990, "dispatching"), note(1610, "a1"), bot(1620, "reviewed"),  # a subagent fills 990..1610
+        result(1630, "Monitor started (task m1, persistent)"),
+        note(2400, "m1"), bot(2410, "watch fired"),           # the monitor's 770 s is not work
+    ])
+    with open(os.path.join(root, "-repo-demo", "p", "subagents", "agent-a1.jsonl"), "w") as f:
+        for sec in range(1000, 1601, 60):
+            f.write(json.dumps(bot(sec, "sub")) + "\n")
+    s = next(x for x in af.load_sessions(root, T0 - timedelta(days=1), T0 + timedelta(days=1)) if x["id"] == "p")
+    runs = [(int((r["start"] - T0).total_seconds()), int((r["end"] - T0).total_seconds())) for r in af.busy_runs(s["events"])]
+    assert runs == [(0, 1630), (2400, 2410)], runs
+    # you prompted once, at 0: the agent's work after you left is not your desk time, and not dead air
+    k = af.analyze([s], T0 - timedelta(days=1))["kpi"]
+    assert k["elapsed_h"] * 3600 == af.AWAY_GAP, k["elapsed_h"]
+    assert k["dead_h"] == 0, k["dead_h"]
+
+
 def main():
     with tempfile.TemporaryDirectory() as root:
         build(root)
@@ -108,6 +136,9 @@ def main():
         for anchor in ('id="verdict"', 'id="leaks"', 'id="keep"', 'id="week"', 'id="hours"', 'id="calls"', 'id="tables"'):
             assert anchor in html, anchor
         assert "</script>" in html and html.count("<script>") == 1
+
+    with tempfile.TemporaryDirectory() as root:
+        check_background(root)
 
     print("ok")
 

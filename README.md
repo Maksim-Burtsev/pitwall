@@ -173,14 +173,19 @@ residue (Leroy, *Why is it so hard to do my work?*, OBHDP 2009) and the cost of 
 ## How the measurement works
 
 - **Agent working**: a contiguous run of session events no more than 120 s apart, containing at
-  least one assistant message (98.5% of real intra-run gaps fall under 120 s).
+  least one assistant message (98.5% of real intra-run gaps fall under 120 s). The session's
+  subagent transcripts count as its events, and a background command counts until it reports
+  back. A monitor does not: it can be waiting on anything, you included.
 - **Human prompt**: a user record with `origin.kind == "human"`. Task notifications and tool
   results are not people.
 - **Idle**: from the end of a work run to the next human prompt in that session.
 - **Away**: an idle gap over 20 minutes is dropped, not counted. You went to lunch; that is not
   the agent starving.
-- **Dead air**: time inside your working day when no agent was running at all.
-- **Ignored entirely**: sessions with no human prompt. SDK runs and subagents had no supervisor.
+- **Desk hours**: stretches with agent work, counted only within 20 minutes of one of your
+  prompts. An agent that runs on through the night adds agent-hours, not desk hours.
+- **Dead air**: desk hours when no agent was running at all.
+- **Ignored entirely**: sessions with no human prompt. SDK runs had no supervisor; subagents are
+  counted as the session that launched them.
 
 `WTI` is estimated from how much there was to read and how much you wrote (about 1500 characters
 read and 200 typed per minute), a calibrated guess. Everything else is measured from timestamps.
